@@ -1,554 +1,279 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>TamuFeeds — Turning surplus into smiles</title>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --green-deep: #0F4C35;
-    --green-mid: #1D7A56;
-    --green-light: #D6EFE4;
-    --cream: #FDF6EC;
-    --cream-dark: #F2E8D5;
-    --amber: #E8A020;
-    --amber-light: #FDF0D5;
-    --text-dark: #1A2318;
-    --text-mid: #4A5E52;
-    --text-light: #7A9185;
-    --white: #FFFFFF;
-    --radius: 12px;
-    --radius-sm: 8px;
-  }
-
-  html { scroll-behavior: smooth; }
-
-  body {
-    font-family: 'Inter', sans-serif;
-    background: var(--cream);
-    color: var(--text-dark);
-    font-size: 16px;
-    line-height: 1.6;
-  }
-
-  /* NAV */
-  nav {
-    position: sticky; top: 0; z-index: 100;
-    background: var(--green-deep);
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 14px 32px;
-  }
-  .logo {
-    font-family: 'Fraunces', serif;
-    font-size: 22px; font-weight: 700;
-    color: var(--white);
-    letter-spacing: -0.3px;
-  }
-  .logo em { color: var(--amber); font-style: normal; }
-  .nav-links { display: flex; gap: 6px; }
-  .nav-btn {
-    font-family: 'Inter', sans-serif;
-    font-size: 13px; font-weight: 500;
-    padding: 7px 16px;
-    border-radius: 30px;
-    border: 1.5px solid rgba(255,255,255,0.25);
-    background: transparent;
-    color: rgba(255,255,255,0.75);
-    cursor: pointer;
-    transition: all 0.18s;
-  }
-  .nav-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
-  .nav-btn.active { background: var(--amber); color: var(--green-deep); border-color: var(--amber); font-weight: 600; }
-
-  /* PAGES */
-  .page { display: none; animation: fadeUp 0.3s ease; }
-  .page.active { display: block; }
-  @keyframes fadeUp { from { opacity:0; transform: translateY(12px); } to { opacity:1; transform:none; } }
-
-  /* HERO */
-  .hero {
-    background: var(--green-deep);
-    padding: 72px 32px 80px;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-  }
-  .hero::before {
-    content: '🥬 🍅 🌽 🥕 🍋 🥦 🍠 🫑';
-    position: absolute; top: 12px; left: 0; right: 0;
-    font-size: 26px; letter-spacing: 18px;
-    opacity: 0.12; pointer-events: none;
-    white-space: nowrap; overflow: hidden;
-  }
-  .hero::after {
-    content: '🍠 🫑 🥬 🍅 🌽 🥕 🍋 🥦';
-    position: absolute; bottom: 12px; left: 0; right: 0;
-    font-size: 26px; letter-spacing: 18px;
-    opacity: 0.12; pointer-events: none;
-    white-space: nowrap; overflow: hidden;
-  }
-  .hero-tag {
-    display: inline-block;
-    background: rgba(232,160,32,0.2);
-    color: var(--amber);
-    font-size: 12px; font-weight: 600;
-    letter-spacing: 1.5px; text-transform: uppercase;
-    padding: 5px 14px; border-radius: 30px;
-    margin-bottom: 20px;
-  }
-  .hero h1 {
-    font-family: 'Fraunces', serif;
-    font-size: clamp(32px, 5vw, 52px);
-    font-weight: 700; line-height: 1.15;
-    color: var(--white);
-    margin-bottom: 16px;
-  }
-  .hero h1 em { color: var(--amber); font-style: italic; }
-  .hero p {
-    font-size: 17px; color: rgba(255,255,255,0.72);
-    max-width: 500px; margin: 0 auto 32px;
-    line-height: 1.7;
-  }
-  .hero-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-  .btn-gold {
-    background: var(--amber); color: var(--green-deep);
-    font-weight: 600; font-size: 15px;
-    padding: 12px 28px; border-radius: 30px;
-    border: none; cursor: pointer;
-    transition: transform 0.15s, box-shadow 0.15s;
-  }
-  .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(232,160,32,0.4); }
-  .btn-ghost {
-    background: transparent; color: #fff;
-    font-weight: 500; font-size: 15px;
-    padding: 12px 28px; border-radius: 30px;
-    border: 1.5px solid rgba(255,255,255,0.4);
-    cursor: pointer; transition: all 0.15s;
-  }
-  .btn-ghost:hover { background: rgba(255,255,255,0.1); }
-
-  /* STATS BAND */
-  .stats-band {
-    background: var(--amber);
-    display: grid; grid-template-columns: repeat(3, 1fr);
-    text-align: center; padding: 0;
-  }
-  .stat-item {
-    padding: 22px 16px;
-    border-right: 1px solid rgba(15,76,53,0.18);
-  }
-  .stat-item:last-child { border-right: none; }
-  .stat-num {
-    font-family: 'Fraunces', serif;
-    font-size: 28px; font-weight: 700;
-    color: var(--green-deep);
-  }
-  .stat-label { font-size: 12px; font-weight: 500; color: rgba(15,76,53,0.7); text-transform: uppercase; letter-spacing: 0.8px; margin-top: 2px; }
-
-  /* CONTENT AREA */
-  .content { max-width: 760px; margin: 0 auto; padding: 48px 24px; }
-
-  /* HOW IT WORKS */
-  .section-eyebrow {
-    font-size: 11px; font-weight: 600; letter-spacing: 2px;
-    text-transform: uppercase; color: var(--green-mid);
-    margin-bottom: 8px;
-  }
-  .section-heading {
-    font-family: 'Fraunces', serif;
-    font-size: 28px; font-weight: 600;
-    color: var(--text-dark); margin-bottom: 28px;
-    line-height: 1.25;
-  }
-  .steps-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  .step-card {
-    background: var(--white);
-    border: 1px solid var(--cream-dark);
-    border-radius: var(--radius);
-    padding: 22px;
-    transition: box-shadow 0.2s;
-  }
-  .step-card:hover { box-shadow: 0 4px 20px rgba(15,76,53,0.08); }
-  .step-icon {
-    width: 44px; height: 44px;
-    background: var(--green-light);
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 22px; margin-bottom: 12px;
-  }
-  .step-card h3 { font-size: 15px; font-weight: 600; color: var(--text-dark); margin-bottom: 6px; }
-  .step-card p { font-size: 13px; color: var(--text-mid); line-height: 1.6; }
-
-  /* DONATE FORM */
-  .form-card {
-    background: var(--white);
-    border: 1px solid var(--cream-dark);
-    border-radius: var(--radius);
-    padding: 32px;
-  }
-  .form-group { margin-bottom: 18px; }
-  .form-group label {
-    display: block; font-size: 13px; font-weight: 500;
-    color: var(--text-mid); margin-bottom: 6px;
-  }
-  .form-group input,
-  .form-group select,
-  .form-group textarea {
-    width: 100%;
-    padding: 10px 14px;
-    border: 1.5px solid var(--cream-dark);
-    border-radius: var(--radius-sm);
-    font-family: 'Inter', sans-serif;
-    font-size: 14px;
-    color: var(--text-dark);
-    background: var(--cream);
-    transition: border-color 0.15s;
-    outline: none;
-  }
-  .form-group input:focus,
-  .form-group select:focus,
-  .form-group textarea:focus { border-color: var(--green-mid); background: #fff; }
-  .form-group textarea { height: 90px; resize: vertical; }
-  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  .submit-btn {
-    width: 100%; padding: 13px;
-    background: var(--green-deep); color: #fff;
-    font-family: 'Inter', sans-serif;
-    font-size: 15px; font-weight: 600;
-    border: none; border-radius: 30px;
-    cursor: pointer; margin-top: 6px;
-    transition: background 0.18s, transform 0.15s;
-  }
-  .submit-btn:hover { background: var(--green-mid); transform: translateY(-1px); }
-  .success-msg {
-    display: none;
-    margin-top: 16px;
-    background: var(--green-light);
-    border: 1px solid #9FE1CB;
-    border-radius: var(--radius-sm);
-    padding: 14px 18px;
-    font-size: 14px; color: var(--green-deep);
-    font-weight: 500;
-  }
-
-  /* BROWSE */
-  .filter-bar {
-    display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap;
-  }
-  .filter-bar input {
-    flex: 1; min-width: 180px;
-    padding: 10px 16px;
-    border: 1.5px solid var(--cream-dark);
-    border-radius: 30px;
-    font-family: 'Inter', sans-serif; font-size: 14px;
-    background: var(--white); color: var(--text-dark);
-    outline: none;
-    transition: border-color 0.15s;
-  }
-  .filter-bar input:focus { border-color: var(--green-mid); }
-  .filter-bar select {
-    padding: 10px 16px;
-    border: 1.5px solid var(--cream-dark);
-    border-radius: 30px;
-    font-family: 'Inter', sans-serif; font-size: 14px;
-    background: var(--white); color: var(--text-dark);
-    outline: none; cursor: pointer;
-  }
-  .listings { display: flex; flex-direction: column; gap: 14px; }
-  .listing-card {
-    background: var(--white);
-    border: 1px solid var(--cream-dark);
-    border-radius: var(--radius);
-    padding: 20px 22px;
-    display: flex; align-items: flex-start; gap: 16px;
-    transition: box-shadow 0.2s, transform 0.15s;
-    animation: fadeUp 0.25s ease both;
-  }
-  .listing-card:hover { box-shadow: 0 4px 24px rgba(15,76,53,0.09); transform: translateY(-1px); }
-  .listing-card.claimed { opacity: 0.5; pointer-events: none; }
-  .listing-emoji {
-    width: 52px; height: 52px; flex-shrink: 0;
-    background: var(--green-light);
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 26px;
-  }
-  .listing-body { flex: 1; }
-  .listing-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
-  .listing-name { font-size: 16px; font-weight: 600; color: var(--text-dark); }
-  .badge {
-    font-size: 11px; font-weight: 600;
-    padding: 3px 10px; border-radius: 20px;
-    background: var(--green-light); color: var(--green-deep);
-    white-space: nowrap;
-  }
-  .badge.claimed-badge { background: var(--cream-dark); color: var(--text-light); }
-  .listing-biz { font-size: 13px; font-weight: 500; color: var(--green-mid); margin-bottom: 6px; }
-  .listing-meta {
-    display: flex; flex-wrap: wrap; gap: 14px;
-    font-size: 13px; color: var(--text-light); margin-bottom: 12px;
-  }
-  .listing-meta span { display: flex; align-items: center; gap: 4px; }
-  .claim-btn {
-    font-size: 13px; font-weight: 600;
-    padding: 7px 20px; border-radius: 30px;
-    border: 1.5px solid var(--green-deep);
-    color: var(--green-deep); background: transparent;
-    cursor: pointer; transition: all 0.15s;
-  }
-  .claim-btn:hover { background: var(--green-deep); color: #fff; }
-
-  /* EMPTY */
-  .empty-state { text-align: center; padding: 60px 24px; color: var(--text-light); }
-  .empty-state .big { font-size: 48px; margin-bottom: 12px; }
-  .empty-state p { font-size: 15px; }
-
-  @media (max-width: 560px) {
-    nav { padding: 12px 16px; }
-    .logo { font-size: 18px; }
-    .nav-btn { padding: 6px 10px; font-size: 12px; }
-    .hero { padding: 48px 20px 56px; }
-    .steps-grid { grid-template-columns: 1fr; }
-    .form-row { grid-template-columns: 1fr; }
-    .stats-band { grid-template-columns: 1fr; }
-    .stat-item { border-right: none; border-bottom: 1px solid rgba(15,76,53,0.18); }
-    .content { padding: 32px 16px; }
-    .form-card { padding: 22px 18px; }
-    .listing-card { flex-direction: column; }
-  }
-</style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TamuFeeds — Rescue Food, Feed Children</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body>
 
 <nav>
-  <div class="logo">Tamu<em>Feeds</em></div>
+  <div class="logo" id="logo-home-link" style="cursor:pointer;">Tamu<em>Feeds</em></div>
   <div class="nav-links">
-    <button class="nav-btn active" onclick="showPage('home')">Home</button>
-    <button class="nav-btn" onclick="showPage('donate')">Donate food</button>
-    <button class="nav-btn" onclick="showPage('browse')">Find food</button>
+    <button class="nav-btn" data-page="browse">Browse Listings</button>
+    <button class="nav-btn" data-page="dashboard" data-auth="in" style="display:none;">Impact</button>
+    <button class="nav-btn" data-page="map" data-auth="in" style="display:none;">Map</button>
+    <button class="nav-btn" data-page="donate" data-role="restaurant" style="display:none;">Donate Food</button>
+
+    <button class="nav-btn" data-page="login" data-auth="out">Log In</button>
+    <button class="nav-btn" data-page="signup" data-auth="out">Sign Up</button>
+
+    <div class="nav-user" data-auth="in" style="display:none;">
+      <span id="nav-org-name"></span>
+      <span class="role-pill" id="nav-role-pill"></span>
+      <button class="nav-btn" id="logout-btn">Log Out</button>
+    </div>
   </div>
 </nav>
 
-<!-- HOME PAGE -->
-<div id="home" class="page active">
+<!-- HOME -->
+<section id="home" class="page active">
   <div class="hero">
-    <div class="hero-tag">🌿 Fighting food waste in Kenya</div>
-    <h1>Good food deserves a<br><em>second chance</em></h1>
-    <p>TamuFeeds connects restaurants and suppliers with surplus produce to children's homes and food organisations across Kenya.</p>
+    <div class="hero-tag">Nairobi · Kenya</div>
+    <h1>Turn surplus food into <em>full plates</em> for children</h1>
+    <p>TamuFeeds connects restaurants with surplus food to children's homes nearby — before it goes to waste.</p>
     <div class="hero-btns">
-      <button class="btn-gold" onclick="showPage('donate')">I have food to donate</button>
-      <button class="btn-ghost" onclick="showPage('browse')">Find available food</button>
+      <button class="btn-gold nav-btn" data-page="signup">Get Started</button>
+      <button class="btn-ghost nav-btn" data-page="browse">Browse Listings</button>
     </div>
   </div>
-
   <div class="stats-band">
-    <div class="stat-item">
-      <div class="stat-num">124</div>
-      <div class="stat-label">Donations made</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-num">38</div>
-      <div class="stat-label">Restaurants joined</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-num">2,400 kg</div>
-      <div class="stat-label">Produce rescued</div>
-    </div>
+    <div class="stat-item"><div class="stat-num">Live</div><div class="stat-label">Listings Board</div></div>
+    <div class="stat-item"><div class="stat-num">Real</div><div class="stat-label">Restaurant Accounts</div></div>
+    <div class="stat-item"><div class="stat-num">Fast</div><div class="stat-label">Claim & Pickup</div></div>
   </div>
-
   <div class="content">
-    <p class="section-eyebrow">How it works</p>
-    <h2 class="section-heading">Simple steps, real impact</h2>
+    <div class="section-eyebrow">How it works</div>
+    <div class="section-heading">Three steps, from kitchen to child</div>
     <div class="steps-grid">
       <div class="step-card">
         <div class="step-icon">🏪</div>
-        <h3>Restaurants post surplus</h3>
-        <p>List your available produce, quantity, and pickup window in a few taps.</p>
+        <h3>Restaurant posts surplus</h3>
+        <p>A restaurant lists leftover, still-good food with quantity, category, and pickup window.</p>
       </div>
       <div class="step-card">
-        <div class="step-icon">🔍</div>
-        <h3>Organisations browse</h3>
-        <p>Children's homes and NGOs see what's available and filter by location or food type.</p>
+        <div class="step-icon">📋</div>
+        <h3>NGO claims it</h3>
+        <p>A children's home browses the live board and reserves a listing with one tap.</p>
       </div>
       <div class="step-card">
-        <div class="step-icon">🤝</div>
-        <h3>Claim & coordinate</h3>
-        <p>Claim a listing and arrange a pickup directly — no middlemen, no delays.</p>
+        <div class="step-icon">⏱️</div>
+        <h3>Pickup within the window</h3>
+        <p>A countdown timer keeps everyone honest — unclaimed reservations release automatically.</p>
       </div>
       <div class="step-card">
-        <div class="step-icon">💚</div>
-        <h3>Less waste, more nourishment</h3>
-        <p>Quality food reaches those who need it most instead of going to waste.</p>
+        <div class="step-icon">📊</div>
+        <h3>Track your impact</h3>
+        <p>Every completed handoff adds to a running impact dashboard, with badges for milestones.</p>
       </div>
     </div>
   </div>
-</div>
+</section>
 
-<!-- DONATE PAGE -->
-<div id="donate" class="page">
-  <div class="hero" style="padding: 40px 32px 48px;">
-    <div class="hero-tag">🍽️ For restaurants & suppliers</div>
-    <h1 style="font-size: clamp(24px,4vw,38px);">Post your <em>surplus food</em></h1>
-    <p style="font-size:15px;">Takes less than 2 minutes. Your listing goes live instantly.</p>
-  </div>
+<!-- LOGIN -->
+<section id="login" class="page">
   <div class="content">
     <div class="form-card">
-      <div class="form-group">
-        <label>Restaurant / business name</label>
-        <input type="text" id="biz-name" placeholder="e.g. Mama Oliech Restaurant" />
+      <div class="section-eyebrow">Welcome back</div>
+      <div class="section-heading">Log in</div>
+      <form id="login-form">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="login-email" required>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="login-password" required>
+        </div>
+        <button type="submit" class="submit-btn">Log In</button>
+        <div class="error-msg" id="login-error"></div>
+      </form>
+      <div class="auth-switch">No account yet? <a class="nav-btn" data-page="signup" style="all:unset;cursor:pointer;color:var(--green-mid);font-weight:600;">Sign up</a></div>
+    </div>
+  </div>
+</section>
+
+<!-- SIGNUP -->
+<section id="signup" class="page">
+  <div class="content">
+    <div class="form-card">
+      <div class="section-eyebrow">Join TamuFeeds</div>
+      <div class="section-heading">Create an account</div>
+      <div class="role-toggle">
+        <button type="button" class="role-option selected" data-role="restaurant">
+          <div class="role-icon">🏪</div>
+          <div class="role-name">Sign up as Restaurant</div>
+          <div class="role-desc">I want to donate surplus food</div>
+        </button>
+        <button type="button" class="role-option" data-role="ngo">
+          <div class="role-icon">🏠</div>
+          <div class="role-name">Sign up as Organization</div>
+          <div class="role-desc">I want to claim food</div>
+        </button>
       </div>
-      <div class="form-row">
+      <form id="signup-form">
+        <div class="form-group">
+          <label>Organization name</label>
+          <input type="text" id="signup-org" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="signup-email" required>
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="signup-password" minlength="6" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Location</label>
+            <input type="text" id="signup-location" placeholder="e.g. Westlands, Nairobi" required>
+          </div>
+          <div class="form-group">
+            <label>Phone</label>
+            <input type="tel" id="signup-phone" placeholder="07xx xxx xxx">
+          </div>
+        </div>
+        <button type="submit" class="submit-btn">Create Account</button>
+        <div class="success-msg" id="signup-success"></div>
+        <div class="error-msg" id="signup-error"></div>
+      </form>
+      <div class="auth-switch">Already have an account? <a class="nav-btn" data-page="login" style="all:unset;cursor:pointer;color:var(--green-mid);font-weight:600;">Log in</a></div>
+    </div>
+  </div>
+</section>
+
+<!-- DONATE (restaurants only) -->
+<section id="donate" class="page">
+  <div class="content">
+    <div class="form-card">
+      <div class="section-eyebrow">Post a listing</div>
+      <div class="section-heading">What can you donate today?</div>
+      <form id="donate-form">
         <div class="form-group">
           <label>Food item</label>
-          <input type="text" id="food-item" placeholder="e.g. Sukuma wiki, tomatoes" />
+          <input type="text" id="donate-item" placeholder="e.g. Cooked rice and beans" required>
         </div>
-        <div class="form-group">
-          <label>Quantity</label>
-          <input type="text" id="quantity" placeholder="e.g. 10 kg" />
+        <div class="form-row">
+          <div class="form-group">
+            <label>Quantity</label>
+            <input type="text" id="donate-quantity" placeholder="e.g. 15 kg / serves 40" required>
+          </div>
+          <div class="form-group">
+            <label>Category</label>
+            <select id="donate-category" required>
+              <option value="Vegetables">Vegetables</option>
+              <option value="Fruits">Fruits</option>
+              <option value="Cooked food">Cooked food</option>
+              <option value="Grains & cereals">Grains & cereals</option>
+              <option value="Dairy">Dairy</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
         </div>
-      </div>
-      <div class="form-row">
         <div class="form-group">
           <label>Pickup location</label>
-          <input type="text" id="location" placeholder="e.g. Westlands, Nairobi" />
+          <input type="text" id="donate-location" placeholder="e.g. Kilimani, Nairobi" required>
         </div>
         <div class="form-group">
           <label>Available until</label>
-          <input type="datetime-local" id="avail-until" />
+          <input type="datetime-local" id="donate-until" required>
         </div>
-      </div>
-      <div class="form-group">
-        <label>Category</label>
-        <select id="category">
-          <option value="">Select a category</option>
-          <option>Vegetables</option>
-          <option>Fruits</option>
-          <option>Cooked food</option>
-          <option>Grains & cereals</option>
-          <option>Dairy</option>
-          <option>Other</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Additional notes (optional)</label>
-        <textarea id="notes" placeholder="Allergies, storage tips, contact number..."></textarea>
-      </div>
-      <button class="submit-btn" onclick="submitDonation()">Post donation →</button>
-      <div class="success-msg" id="donate-success">✅ Your donation is live! Organisations can now see and claim it.</div>
+        <div class="form-group">
+          <label>Notes (optional)</label>
+          <textarea id="donate-notes" placeholder="Any handling notes, allergens, etc."></textarea>
+        </div>
+        <button type="submit" class="submit-btn">Post Listing</button>
+        <div class="success-msg" id="donate-success">Listing posted! It's now live on the board.</div>
+        <div class="error-msg" id="donate-error"></div>
+      </form>
     </div>
   </div>
-</div>
+</section>
 
-<!-- BROWSE PAGE -->
-<div id="browse" class="page">
-  <div class="hero" style="padding: 40px 32px 48px;">
-    <div class="hero-tag">🏠 For children's homes & NGOs</div>
-    <h1 style="font-size: clamp(24px,4vw,38px);">Find <em>available food</em> near you</h1>
-    <p style="font-size:15px;">Browse fresh listings from restaurants across Nairobi and beyond.</p>
-  </div>
-  <div class="content">
+<!-- BROWSE -->
+<section id="browse" class="page">
+  <div class="content wide">
+    <div class="section-eyebrow">Live board</div>
+    <div class="section-heading">Available food right now</div>
     <div class="filter-bar">
-      <input type="text" id="search-input" placeholder="Search food, restaurant or area..." oninput="filterListings()" />
-      <select id="cat-filter" onchange="filterListings()">
+      <input type="text" id="search-input" placeholder="Search food, restaurant, or location...">
+      <select id="category-filter">
         <option value="">All categories</option>
-        <option>Vegetables</option>
-        <option>Fruits</option>
-        <option>Cooked food</option>
-        <option>Grains & cereals</option>
+        <option value="Vegetables">Vegetables</option>
+        <option value="Fruits">Fruits</option>
+        <option value="Cooked food">Cooked food</option>
+        <option value="Grains & cereals">Grains & cereals</option>
+        <option value="Dairy">Dairy</option>
+        <option value="Other">Other</option>
       </select>
+      <label class="checkbox-filter"><input type="checkbox" id="available-only" checked> Available only</label>
     </div>
-    <div class="listings" id="listings-container"></div>
+    <div class="listings" id="listings-container">
+      <div class="empty-state"><div class="big">⏳</div><p>Loading listings...</p></div>
+    </div>
   </div>
-</div>
+</section>
 
-<script>
-const emojiMap = {
-  'Vegetables': '🥬',
-  'Fruits': '🍋',
-  'Cooked food': '🍲',
-  'Grains & cereals': '🌾',
-  'Dairy': '🥛',
-  'Other': '📦'
-};
+<!-- DASHBOARD -->
+<section id="dashboard" class="page">
+  <div class="content" id="dashboard-content">
+    <div class="empty-state"><div class="big">⏳</div><p>Loading your impact...</p></div>
+  </div>
+</section>
 
-const listings = [
-  { id:1, biz:"Java House Westlands", item:"Mixed vegetables", qty:"8 kg", location:"Westlands, Nairobi", category:"Vegetables", until:"Today, 6:00 PM", claimed:false },
-  { id:2, biz:"Artcaffe Garden City", item:"Assorted fruits", qty:"5 kg", location:"Thika Road, Nairobi", category:"Fruits", until:"Today, 5:00 PM", claimed:false },
-  { id:3, biz:"Mama Oliech Restaurant", item:"Ugali & sukuma wiki", qty:"20 portions", location:"Hurlingham, Nairobi", category:"Cooked food", until:"Today, 3:00 PM", claimed:true },
-  { id:4, biz:"Dormans Coffee Karen", item:"Bread & pastries", qty:"30 pieces", location:"Karen, Nairobi", category:"Grains & cereals", until:"Today, 7:00 PM", claimed:false },
-  { id:5, biz:"Nairobi Street Kitchen", item:"Tomatoes & onions", qty:"12 kg", location:"CBD, Nairobi", category:"Vegetables", until:"Tomorrow, 9:00 AM", claimed:false },
-  { id:6, biz:"Kaldis Coffee Gigiri", item:"Ripe bananas & mangoes", qty:"6 kg", location:"Gigiri, Nairobi", category:"Fruits", until:"Today, 4:30 PM", claimed:false },
-];
+<!-- MAP -->
+<section id="map" class="page">
+  <div class="content wide">
+    <div class="section-eyebrow">Live map</div>
+    <div class="section-heading">Listings near you</div>
+    <div id="map-container"></div>
+    <p id="map-note" style="color:var(--text-light);font-size:12px;margin-top:10px;"></p>
+    <div style="display:flex;gap:16px;margin-top:10px;font-size:12px;color:var(--text-mid);flex-wrap:wrap;">
+      <span>🟢 Available</span>
+      <span>🟡 Claimed</span>
+      <span>⚪ Completed</span>
+      <span>🔴 Expired</span>
+    </div>
+  </div>
+</section>
 
-function renderListings(data) {
-  const c = document.getElementById('listings-container');
-  if (!data.length) {
-    c.innerHTML = '<div class="empty-state"><div class="big">🌿</div><p>No listings match your search. Try a different filter.</p></div>';
-    return;
-  }
-  c.innerHTML = data.map((l, i) => `
-    <div class="listing-card ${l.claimed ? 'claimed' : ''}" id="card-${l.id}" style="animation-delay:${i*0.05}s">
-      <div class="listing-emoji">${emojiMap[l.category] || '📦'}</div>
-      <div class="listing-body">
-        <div class="listing-top">
-          <span class="listing-name">${l.item}</span>
-          <span class="badge ${l.claimed ? 'claimed-badge' : ''}">${l.claimed ? 'Claimed' : l.category}</span>
-        </div>
-        <div class="listing-biz">🏪 ${l.biz}</div>
-        <div class="listing-meta">
-          <span>📍 ${l.location}</span>
-          <span>📦 ${l.qty}</span>
-          <span>🕐 Until ${l.until}</span>
-        </div>
-        <button class="claim-btn" onclick="claimListing(${l.id})">${l.claimed ? 'Already claimed' : 'Claim donation →'}</button>
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="logo">Tamu<em>Feeds</em></div>
+      <p>Turning surplus food into full plates for children across Kenya.</p>
+    </div>
+    <div class="footer-links">
+      <div class="footer-col">
+        <h4>Platform</h4>
+        <a class="nav-btn" data-page="browse" style="all:unset;cursor:pointer;">Browse Listings</a>
+        <a class="nav-btn" data-page="signup" style="all:unset;cursor:pointer;">Sign Up</a>
+        <a class="nav-btn" data-page="login" style="all:unset;cursor:pointer;">Log In</a>
+      </div>
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <span>Nairobi, Kenya</span>
+        <a href="mailto:hello@tamufeeds.com">hello@tamufeeds.com</a>
       </div>
     </div>
-  `).join('');
-}
+  </div>
+  <div class="footer-bottom">© <span id="footer-year"></span> TamuFeeds. All rights reserved.</div>
+</footer>
 
-function claimListing(id) {
-  const l = listings.find(x => x.id === id);
-  if (l) { l.claimed = true; filterListings(); }
-}
-
-function filterListings() {
-  const q = document.getElementById('search-input').value.toLowerCase();
-  const cat = document.getElementById('cat-filter').value;
-  const filtered = listings.filter(l =>
-    (!q || l.item.toLowerCase().includes(q) || l.location.toLowerCase().includes(q) || l.biz.toLowerCase().includes(q)) &&
-    (!cat || l.category === cat)
-  );
-  renderListings(filtered);
-}
-
-function submitDonation() {
-  const name = document.getElementById('biz-name').value.trim();
-  const item = document.getElementById('food-item').value.trim();
-  if (!name || !item) { alert('Please fill in at least the business name and food item.'); return; }
-  const msg = document.getElementById('donate-success');
-  msg.style.display = 'block';
-  document.getElementById('biz-name').value = '';
-  document.getElementById('food-item').value = '';
-  document.getElementById('quantity').value = '';
-  document.getElementById('location').value = '';
-  document.getElementById('avail-until').value = '';
-  document.getElementById('category').value = '';
-  document.getElementById('notes').value = '';
-  setTimeout(() => msg.style.display = 'none', 5000);
-}
-
-function showPage(id) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach((b, i) => {
-    b.classList.toggle('active', ['home','donate','browse'][i] === id);
-  });
-  document.getElementById(id).classList.add('active');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-  if (id === 'browse') renderListings(listings);
-}
-</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/listings.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/map.js"></script>
+<script src="js/app.js"></script>
 </body>
 </html>
