@@ -14,10 +14,11 @@
 <nav>
   <div class="logo" id="logo-home-link" style="cursor:pointer;">Tamu<em>Feeds</em></div>
   <div class="nav-links">
+     <button class="nav-btn" data-page="home">Home</button>
     <button class="nav-btn" data-page="browse">Browse Listings</button>
     <button class="nav-btn" data-page="dashboard" data-auth="in" style="display:none;">Impact</button>
     <button class="nav-btn" data-page="map" data-auth="in" style="display:none;">Map</button>
-    <button class="nav-btn" data-page="donate" data-role="restaurant" style="display:none;">Donate Food</button>
+   <button id="nav-donate-btn" class="nav-btn" data-page="donate" style="display:none;">Donate Food</button>
 
     <button class="nav-btn" data-page="login" data-auth="out">Log In</button>
     <button class="nav-btn" data-page="signup" data-auth="out">Sign Up</button>
@@ -34,10 +35,10 @@
 <section id="home" class="page active">
   <div class="hero">
     <div class="hero-tag">Nairobi · Kenya</div>
-    <h1>Turn surplus food into <em>full plates</em> for children</h1>
+    <h1>Surplus food. <em> Full plates.</em></h1>
     <p>TamuFeeds connects restaurants with surplus food to children's homes nearby — before it goes to waste.</p>
     <div class="hero-btns">
-      <button class="btn-gold nav-btn" data-page="signup">Get Started</button>
+     <button class="btn-gold nav-btn" id="hero-cta-btn" data-page="signup">Get Started</button>
       <button class="btn-ghost nav-btn" data-page="browse">Browse Listings</button>
     </div>
   </div>
@@ -92,7 +93,48 @@
         <button type="submit" class="submit-btn">Log In</button>
         <div class="error-msg" id="login-error"></div>
       </form>
+      <div class="auth-switch"><a class="nav-btn" data-page="forgot-password" style="all:unset;cursor:pointer;color:var(--green-mid);font-weight:600;">Forgot password?</a></div>
       <div class="auth-switch">No account yet? <a class="nav-btn" data-page="signup" style="all:unset;cursor:pointer;color:var(--green-mid);font-weight:600;">Sign up</a></div>
+    </div>
+  </div>
+</section>
+
+<!-- FORGOT PASSWORD -->
+<section id="forgot-password" class="page">
+  <div class="content">
+    <div class="form-card">
+      <div class="section-eyebrow">Reset access</div>
+      <div class="section-heading">Forgot your password?</div>
+      <p style="font-size:13px;color:var(--text-mid);margin-bottom:18px;">Enter the email on your account. We'll send you a link to reset your password.</p>
+      <form id="forgot-password-form">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="forgot-email" required>
+        </div>
+        <button type="submit" class="submit-btn">Send Reset Link</button>
+        <div class="success-msg" id="forgot-success">Check your email for a reset link.</div>
+        <div class="error-msg" id="forgot-error"></div>
+      </form>
+      <div class="auth-switch">Remembered it? <a class="nav-btn" data-page="login" style="all:unset;cursor:pointer;color:var(--green-mid);font-weight:600;">Log in</a></div>
+    </div>
+  </div>
+</section>
+
+<!-- RESET PASSWORD -->
+<section id="reset-password" class="page">
+  <div class="content">
+    <div class="form-card">
+      <div class="section-eyebrow">Almost done</div>
+      <div class="section-heading">Set a new password</div>
+      <form id="reset-password-form">
+        <div class="form-group">
+          <label>New password</label>
+          <input type="password" id="reset-password-input" minlength="6" required>
+        </div>
+        <button type="submit" class="submit-btn">Update Password</button>
+        <div class="success-msg" id="reset-success">Password updated! You can log in now.</div>
+        <div class="error-msg" id="reset-error"></div>
+      </form>
     </div>
   </div>
 </section>
@@ -105,12 +147,10 @@
       <div class="section-heading">Create an account</div>
       <div class="role-toggle">
         <button type="button" class="role-option selected" data-role="restaurant">
-          <div class="role-icon">🏪</div>
           <div class="role-name">Sign up as Restaurant</div>
           <div class="role-desc">I want to donate surplus food</div>
         </button>
         <button type="button" class="role-option" data-role="ngo">
-          <div class="role-icon">🏠</div>
           <div class="role-name">Sign up as Organization</div>
           <div class="role-desc">I want to claim food</div>
         </button>
@@ -204,16 +244,19 @@
     <div class="section-heading">Available food right now</div>
     <div class="filter-bar">
       <input type="text" id="search-input" placeholder="Search food, restaurant, or location...">
-      <select id="category-filter">
-        <option value="">All categories</option>
-        <option value="Vegetables">Vegetables</option>
-        <option value="Fruits">Fruits</option>
-        <option value="Cooked food">Cooked food</option>
-        <option value="Grains & cereals">Grains & cereals</option>
-        <option value="Dairy">Dairy</option>
-        <option value="Other">Other</option>
-      </select>
-      <label class="checkbox-filter"><input type="checkbox" id="available-only" checked> Available only</label>
+     <label class="checkbox-filter"><input type="checkbox" id="available-only" checked>Available Only</label>
+    </div>
+    <div class="category-chips" id="category-chips">
+      <button type="button" class="chip active" data-category="">All</button>
+      <button type="button" class="chip" data-category="Vegetables">🥬 Vegetables</button>
+      <button type="button" class="chip" data-category="Fruits">🍎 Fruits</button>
+      <button type="button" class="chip" data-category="Cooked food">🍲 Cooked food</button>
+      <button type="button" class="chip" data-category="Grains & cereals">🌾 Grains & cereals</button>
+      <button type="button" class="chip" data-category="Dairy">🥛 Dairy</button>
+      <button type="button" class="chip" data-category="Other">🍽️ Other</button>
+    </div>
+    <div class="listings" id="listings-container">
+      <label class="checkbox-filter"><input type="checkbox" id="available-only" checked> Avaliable only</label>
     </div>
     <div class="listings" id="listings-container">
       <div class="empty-state"><div class="big">⏳</div><p>Loading listings...</p></div>

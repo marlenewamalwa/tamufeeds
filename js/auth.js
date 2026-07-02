@@ -6,20 +6,20 @@ const Auth = {
   session: null,
   profile: null,
 
-  async init(onChange) {
+ async init(onChange) {
     const { data: { session } } = await sb.auth.getSession();
     this.session = session;
     if (session) await this.loadProfile();
-    onChange(this.session, this.profile);
+    onChange(this.session, this.profile, 'INITIAL_SESSION');
 
-    sb.auth.onAuthStateChange(async (_event, session) => {
+    sb.auth.onAuthStateChange(async (event, session) => {
       this.session = session;
       if (session) {
         await this.loadProfile();
       } else {
         this.profile = null;
       }
-      onChange(this.session, this.profile);
+      onChange(this.session, this.profile, event);
     });
   },
 
@@ -54,8 +54,32 @@ const Auth = {
     return { data, error };
   },
 
-  async signOut() {
+ async signOut() {
     await sb.auth.signOut();
+  },
+
+  async requestPasswordReset(email) {
+    const { data, error } = await sb.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + window.location.pathname
+    });
+    return { data, error };
+  },
+
+  async updatePassword(newPassword) {
+    const { data, error } = await sb.auth.updateUser({ password: newPassword });
+    return { data, error };
+  },
+
+  async requestPasswordReset(email) {
+    const { data, error } = await sb.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + window.location.pathname
+    });
+    return { data, error };
+  },
+
+  async updatePassword(newPassword) {
+    const { data, error } = await sb.auth.updateUser({ password: newPassword });
+    return { data, error };
   },
 
   isRestaurant() {

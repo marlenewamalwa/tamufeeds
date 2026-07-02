@@ -18,22 +18,36 @@ function showPage(id) {
 function updateNavForAuth(session, profile) {
   const loggedOutEls = document.querySelectorAll('[data-auth="out"]');
   const loggedInEls = document.querySelectorAll('[data-auth="in"]');
-  const restaurantEls = document.querySelectorAll('[data-role="restaurant"]');
-  const ngoEls = document.querySelectorAll('[data-role="ngo"]');
+  const donateBtn = document.getElementById('nav-donate-btn');
+  const heroCta = document.getElementById('hero-cta-btn');
 
   loggedOutEls.forEach(el => el.style.display = session ? 'none' : '');
   loggedInEls.forEach(el => el.style.display = session ? '' : 'none');
 
   if (session && profile) {
-    restaurantEls.forEach(el => el.style.display = profile.role === 'restaurant' ? '' : 'none');
-    ngoEls.forEach(el => el.style.display = profile.role === 'ngo' ? '' : 'none');
-    const nameEl = document.getElementById('nav-org-name');
-    const rolePill = document.getElementById('nav-role-pill');
-    if (nameEl) nameEl.textContent = profile.org_name;
-    if (rolePill) rolePill.textContent = profile.role;
+    if (donateBtn) {
+      donateBtn.style.display = profile.role === 'restaurant' ? '' : 'none';
+    }
+    document.getElementById('nav-org-name').textContent = profile.org_name;
+    document.getElementById('nav-role-pill').textContent = profile.role;
+
+    if (heroCta) {
+      if (profile.role === 'restaurant') {
+        heroCta.textContent = 'Donate';
+        heroCta.dataset.page = 'donate';
+      } else {
+        heroCta.textContent = 'Claim';
+        heroCta.dataset.page = 'browse';
+      }
+    }
   } else {
-    restaurantEls.forEach(el => el.style.display = 'none');
-    ngoEls.forEach(el => el.style.display = 'none');
+    if (donateBtn) {
+      donateBtn.style.display = 'none';
+    }
+    if (heroCta) {
+      heroCta.textContent = 'Get Started';
+      heroCta.dataset.page = 'signup';
+    }
   }
 }
 
@@ -94,6 +108,45 @@ function initAuthForms() {
     await Auth.signOut();
     showPage('home');
   });
+
+  document.getElementById('forgot-password-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const errorEl = document.getElementById('forgot-error');
+    const successEl = document.getElementById('forgot-success');
+    errorEl.style.display = 'none';
+    successEl.style.display = 'none';
+
+    const email = document.getElementById('forgot-email').value.trim();
+    const { error } = await Auth.requestPasswordReset(email);
+
+    if (error) {
+      errorEl.textContent = error.message;
+      errorEl.style.display = 'block';
+      return;
+    }
+    successEl.style.display = 'block';
+    e.target.reset();
+  });
+
+  document.getElementById('reset-password-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const errorEl = document.getElementById('reset-error');
+    const successEl = document.getElementById('reset-success');
+    errorEl.style.display = 'none';
+    successEl.style.display = 'none';
+
+    const newPassword = document.getElementById('reset-password-input').value;
+    const { error } = await Auth.updatePassword(newPassword);
+
+    if (error) {
+      errorEl.textContent = error.message;
+      errorEl.style.display = 'block';
+      return;
+    }
+    successEl.style.display = 'block';
+    e.target.reset();
+    setTimeout(() => showPage('login'), 2000);
+  });
 }
 
 // ---------- Donate form ----------
@@ -139,7 +192,7 @@ async function refreshListings() {
 
 function renderListings() {
   const query = document.getElementById('search-input')?.value || '';
-  const category = document.getElementById('category-filter')?.value || '';
+  const category = selectedCategory;
   const onlyAvailable = document.getElementById('available-only')?.checked ?? true;
 
   const filtered = Listings.filter(Listings.cache, { query, category, onlyAvailable });
@@ -188,12 +241,12 @@ function renderListingCard(l) {
 
   return `
     <div class="listing-card ${l.status}" data-listing-id="${l.id}">
-      <div class="listing-emoji">${CATEGORY_EMOJI[l.category] || '🍽️'}</div>
+      <div class="listing-card-top">
+        <div class="listing-emoji">${CATEGORY_EMOJI[l.category] || '🍽️'}</div>
+        ${statusBadge}
+      </div>
       <div class="listing-body">
-        <div class="listing-top">
-          <div class="listing-name">${escapeHtml(l.food_item)}</div>
-          ${statusBadge}
-        </div>
+        <div class="listing-name">${escapeHtml(l.food_item)}</div>
         <div class="listing-biz">${escapeHtml(l.restaurant?.org_name || 'Unknown restaurant')}</div>
         <div class="listing-meta">
           <span>📦 ${escapeHtml(l.quantity)}</span>
@@ -201,7 +254,7 @@ function renderListingCard(l) {
           <span>⏰ Until ${new Date(l.available_until).toLocaleString()}</span>
         </div>
         ${countdownHtml}
-        ${actionHtml}
+        <div class="listing-action">${actionHtml}</div>
       </div>
     </div>`;
 }
@@ -246,13 +299,28 @@ function tickCountdowns() {
   }, 1000);
 }
 
+let selectedCategory = '';
+
 function initFilters() {
   document.getElementById('search-input')?.addEventListener('input', renderListings);
-  document.getElementById('category-filter')?.addEventListener('change', renderListings);
   document.getElementById('available-only')?.addEventListener('change', renderListings);
+
+  document.querySelectorAll('#category-chips .chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('#category-chips .chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      selectedCategory = chip.dataset.category;
+      renderListings();
+    });
+  });
 }
 
 // ---------- Init ----------
+document.getElementById('logo-home-link')?.addEventListener('click', () => showPage('home'));
+
+const footerYearEl = document.getElementById('footer-year');
+if (footerYearEl) footerYearEl.textContent = new Date().getFullYear();
+
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.nav-btn[data-page]').forEach(btn => {
     btn.addEventListener('click', () => showPage(btn.dataset.page));
@@ -262,8 +330,11 @@ document.addEventListener('DOMContentLoaded', () => {
   initDonateForm();
   initFilters();
 
-  Auth.init((session, profile) => {
+  Auth.init((session, profile, event) => {
     updateNavForAuth(session, profile);
+    if (event === 'PASSWORD_RECOVERY') {
+      showPage('reset-password');
+    }
   });
 
   Listings.subscribeToChanges(() => {
