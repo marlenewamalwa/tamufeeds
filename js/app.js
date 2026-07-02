@@ -1,7 +1,11 @@
 // App — navigation, rendering, event wiring
-const CATEGORY_EMOJI = {
-  'Vegetables': '🥬', 'Fruits': '🍎', 'Cooked food': '🍲',
-  'Grains & cereals': '🌾', 'Dairy': '🥛', 'Other': '🍽️'
+const CATEGORY_ICONS = {
+  'Vegetables': 'https://unpkg.com/lucide-static@latest/icons/carrot.svg',
+  'Fruits': 'https://unpkg.com/lucide-static@latest/icons/apple.svg',
+  'Cooked food': 'https://unpkg.com/lucide-static@latest/icons/soup.svg',
+  'Grains & cereals': 'https://unpkg.com/lucide-static@latest/icons/wheat.svg',
+  'Dairy': 'https://unpkg.com/lucide-static@latest/icons/milk.svg',
+  'Other': 'https://unpkg.com/lucide-static@latest/icons/utensils.svg'
 };
 
 let countdownTimer = null;
@@ -183,10 +187,14 @@ function initDonateForm() {
 
 // ---------- Browse / listings rendering ----------
 async function refreshListings() {
-  await Listings.fetchAll();
-  const claims = Listings.cache.flatMap(l => l.claims || []);
-  await Claims.expireOverdue(claims);
-  await Listings.fetchAll(); // re-fetch after any expiry updates
+  try {
+    await Listings.fetchAll();
+    const claims = Listings.cache.flatMap(l => l.claims || []);
+    await Claims.expireOverdue(claims);
+    await Listings.fetchAll(); // re-fetch after any expiry updates
+  } catch (err) {
+    console.error('refreshListings failed', err);
+  }
   renderListings();
 }
 
@@ -242,7 +250,7 @@ function renderListingCard(l) {
   return `
     <div class="listing-card ${l.status}" data-listing-id="${l.id}">
       <div class="listing-card-top">
-        <div class="listing-emoji">${CATEGORY_EMOJI[l.category] || '🍽️'}</div>
+        <img class="listing-card-icon" src="${CATEGORY_ICONS[l.category] || CATEGORY_ICONS['Other']}" alt="">
         ${statusBadge}
       </div>
       <div class="listing-body">

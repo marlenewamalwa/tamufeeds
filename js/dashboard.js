@@ -1,7 +1,3 @@
-// ============================================================
-// Dashboard module — impact stats + badges
-// ============================================================
-
 const BADGES = [
   { id: 'first_rescue', icon: '🌱', name: 'First Rescue', desc: '1 completed handoff', threshold: 1 },
   { id: 'on_a_roll', icon: '🔥', name: 'On a Roll', desc: '5 completed handoffs', threshold: 5 },
@@ -30,17 +26,24 @@ async function refreshDashboard() {
     return;
   }
 
+  const { count: platformTotal } = await sb.from('listings').select('*', { count: 'exact', head: true });
+
   const completed = data.completed_count || 0;
   const total = data.total_count || 0;
   const roleLabel = data.role === 'restaurant' ? 'Listings Posted' : 'Items Claimed';
   const completedLabel = data.role === 'restaurant' ? 'Handoffs Completed' : 'Successful Pickups';
 
-  const statsHtml = `
+ const statsHtml = `
     <div class="dash-grid">
       <div class="dash-stat"><div class="num">${total}</div><div class="label">${roleLabel}</div></div>
       <div class="dash-stat"><div class="num">${completed}</div><div class="label">${completedLabel}</div></div>
       <div class="dash-stat"><div class="num">${total ? Math.round((completed / total) * 100) : 0}%</div><div class="label">Completion Rate</div></div>
+      <div class="dash-stat"><div class="num">${platformTotal ?? '—'}</div><div class="label">Total Listings on TamuFeeds</div></div>
     </div>`;
+
+  const actionHtml = data.role === 'restaurant'
+    ? `<button class="submit-btn dash-action-btn" onclick="showPage('donate')">+ Post a New Listing</button>`
+    : `<button class="submit-btn dash-action-btn" onclick="showPage('browse')">Browse Available Listings</button>`;
 
   const badgesHtml = BADGES.map(b => {
     const unlocked = completed >= b.threshold;
@@ -55,6 +58,7 @@ async function refreshDashboard() {
   container.innerHTML = `
     <div class="section-eyebrow">Your impact</div>
     <div class="section-heading">${data.org_name}'s progress</div>
+    ${actionHtml}
     ${statsHtml}
     <div class="section-eyebrow" style="margin-top:36px;">Badges</div>
     <div class="section-heading" style="font-size:20px;margin-bottom:18px;">Milestones unlocked</div>

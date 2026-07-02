@@ -226,8 +226,8 @@ nav {
 .filter-bar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
 .filter-bar input { flex: 1; min-width: 220px; padding: 11px 18px; border: 1.5px solid var(--cream-dark); border-radius: 30px; font-family: 'Inter', sans-serif; font-size: 14px; background: var(--white); color: var(--text-dark); outline: none; transition: border-color 0.15s; }
 .filter-bar input:focus { border-color: var(--green-mid); }
-.filter-bar .checkbox-filter { display: flex; align-items: center; gap: 2px; font-size: 13px; color: var(--text-mid); padding: 0 6px;  }
-
+.filter-bar .checkbox-filter { display: flex; align-items: center; gap: 2px; font-size: 13px; color: var(--text-mid); padding: 0 2px;  }
+.checkbox-filter input[type="checkbox"] { margin: 0; }
 .category-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 28px; }
 .chip {
   font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500;
@@ -255,7 +255,9 @@ nav {
   background: var(--green-light); padding: 24px 18px 18px;
   display: flex; align-items: flex-start; justify-content: space-between;
 }
-.listing-card .listing-emoji { font-size: 40px; line-height: 1; background: none; width: auto; height: auto; }
+.chip-icon { width: 15px; height: 15px; vertical-align: -3px; margin-right: 5px; filter: brightness(0) saturate(100%) opacity(0.6); }
+.chip.active .chip-icon { filter: brightness(0) invert(1); }
+.listing-card-icon { width: 40px; height: 40px; }
 .listing-body { padding: 16px 18px 18px; display: flex; flex-direction: column; flex: 1; }
 .listing-name { font-size: 16px; font-weight: 600; color: var(--text-dark); margin-bottom: 4px; }
 .badge { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; background: var(--white); color: var(--green-deep); white-space: nowrap; }
@@ -286,6 +288,7 @@ nav {
 
 /* DASHBOARD */
 .dash-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px; }
+.dash-action-btn { margin: 14px 0 8px; max-width: 280px; }
 .dash-stat { background: var(--white); border: 1px solid var(--cream-dark); border-radius: var(--radius); padding: 22px; text-align: center; }
 .dash-stat .num { font-family: 'Fraunces', serif; font-size: 32px; font-weight: 700; color: var(--green-deep); }
 .dash-stat .label { font-size: 12px; color: var(--text-mid); text-transform: uppercase; letter-spacing: 0.6px; margin-top: 4px; }

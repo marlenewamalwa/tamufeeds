@@ -247,14 +247,14 @@
      <label class="checkbox-filter"><input type="checkbox" id="available-only" checked>Available Only</label>
     </div>
     <div class="category-chips" id="category-chips">
-      <button type="button" class="chip active" data-category="">All</button>
-      <button type="button" class="chip" data-category="Vegetables">🥬 Vegetables</button>
-      <button type="button" class="chip" data-category="Fruits">🍎 Fruits</button>
-      <button type="button" class="chip" data-category="Cooked food">🍲 Cooked food</button>
-      <button type="button" class="chip" data-category="Grains & cereals">🌾 Grains & cereals</button>
-      <button type="button" class="chip" data-category="Dairy">🥛 Dairy</button>
-      <button type="button" class="chip" data-category="Other">🍽️ Other</button>
-    </div>
+  <button type="button" class="chip active" data-category="">All</button>
+  <button type="button" class="chip" data-category="Vegetables"><img class="chip-icon" src="https://unpkg.com/lucide-static@latest/icons/carrot.svg" alt=""> Vegetables</button>
+  <button type="button" class="chip" data-category="Fruits"><img class="chip-icon" src="https://unpkg.com/lucide-static@latest/icons/apple.svg" alt=""> Fruits</button>
+  <button type="button" class="chip" data-category="Cooked food"><img class="chip-icon" src="https://unpkg.com/lucide-static@latest/icons/soup.svg" alt=""> Cooked food</button>
+  <button type="button" class="chip" data-category="Grains & cereals"><img class="chip-icon" src="https://unpkg.com/lucide-static@latest/icons/wheat.svg" alt=""> Grains & cereals</button>
+  <button type="button" class="chip" data-category="Dairy"><img class="chip-icon" src="https://unpkg.com/lucide-static@latest/icons/milk.svg" alt=""> Dairy</button>
+  <button type="button" class="chip" data-category="Other"><img class="chip-icon" src="https://unpkg.com/lucide-static@latest/icons/utensils.svg" alt=""> Other</button>
+</div>
     <div class="listings" id="listings-container">
       <label class="checkbox-filter"><input type="checkbox" id="available-only" checked> Avaliable only</label>
     </div>
@@ -286,6 +286,62 @@
     </div>
   </div>
 </section>
+<!-- FAQ -->
+<section id="faq" class="page">
+  <div class="content">
+    <div class="section-eyebrow">Help</div>
+    <div class="section-heading">Frequently asked questions</div>
+
+    <div class="faq-item">
+      <h4>What is TamuFeeds?</h4>
+      <p>TamuFeeds connects restaurants with surplus, still-good food to children's homes and NGOs nearby, so it gets eaten instead of thrown away.</p>
+    </div>
+    <div class="faq-item">
+      <h4>Who can join?</h4>
+      <p>Any restaurant or food business with surplus food to give, and any registered NGO or children's home that can collect it.</p>
+    </div>
+    <div class="faq-item">
+      <h4>Does it cost anything?</h4>
+      <p>No. TamuFeeds is free for both restaurants and NGOs.</p>
+    </div>
+    <div class="faq-item">
+      <h4>How long do NGOs have to collect a claimed listing?</h4>
+      <p>Once claimed, there's a 3-hour pickup window. If it's not marked picked up in time, the listing automatically becomes available again for others.</p>
+    </div>
+    <div class="faq-item">
+      <h4>Is my information safe?</h4>
+      <p>Your account details are stored securely and only shared with the other party once a claim is made, so pickup can be coordinated. See our Privacy Policy for details.</p>
+    </div>
+    <div class="faq-item">
+      <h4>How do I report a problem?</h4>
+      <p>Email us at <a href="mailto:hello@tamufeeds.com">hello@tamufeeds.com</a> and we'll get back to you.</p>
+    </div>
+  </div>
+</section>
+
+<!-- PRIVACY -->
+<section id="privacy" class="page">
+  <div class="content legal-text">
+    <div class="section-eyebrow">Legal</div>
+    <div class="section-heading">Privacy Policy</div>
+    <p>This is a starter policy for TamuFeeds and should be reviewed by a legal professional before public launch.</p>
+
+    <h4>What we collect</h4>
+    <p>When you sign up, we collect your email, organization name, location, and phone number. When you post or claim a listing, we store the details of that listing or claim.</p>
+
+    <h4>How we use it</h4>
+    <p>Your information is used to operate the platform — matching restaurants with NGOs, showing listings on the map and board, and enabling communication needed to coordinate a pickup.</p>
+
+    <h4>Who can see it</h4>
+    <p>Your organization name and location are visible to other logged-in users on the platform. Your phone number is only shared with the other party once a claim is made.</p>
+
+    <h4>Where it's stored</h4>
+    <p>Data is stored with Supabase, a hosted database provider, and protected with row-level access rules so accounts can only modify their own data.</p>
+
+    <h4>Contact</h4>
+    <p>Questions about your data? Email <a href="mailto:hello@tamufeeds.com">hello@tamufeeds.com</a>.</p>
+  </div>
+</section>
 
 <footer class="site-footer">
   <div class="footer-inner">
@@ -294,11 +350,16 @@
       <p>Turning surplus food into full plates for children across Kenya.</p>
     </div>
     <div class="footer-links">
-      <div class="footer-col">
+     <div class="footer-col">
         <h4>Platform</h4>
         <a class="nav-btn" data-page="browse" style="all:unset;cursor:pointer;">Browse Listings</a>
         <a class="nav-btn" data-page="signup" style="all:unset;cursor:pointer;">Sign Up</a>
         <a class="nav-btn" data-page="login" style="all:unset;cursor:pointer;">Log In</a>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <a class="nav-btn" data-page="faq" style="all:unset;cursor:pointer;">FAQ</a>
+        <a class="nav-btn" data-page="privacy" style="all:unset;cursor:pointer;">Privacy Policy</a>
       </div>
       <div class="footer-col">
         <h4>Contact</h4>
