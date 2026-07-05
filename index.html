@@ -11,6 +11,22 @@
 </head>
 <body>
 
+<div id="toast-container" class="toast-container"></div>
+
+<div id="chat-panel" class="chat-panel">
+  <div class="chat-header">
+    <span>TamuFeeds Helper</span>
+    <button id="chat-close-btn" class="chat-close-btn" type="button">&times;</button>
+  </div>
+  <div id="chat-log" class="chat-log"></div>
+  <div id="chat-suggestions" class="chat-suggestions"></div>
+  <form id="chat-form" class="chat-form">
+    <input id="chat-input" type="text" placeholder="Ask a question..." autocomplete="off">
+    <button type="submit">Send</button>
+  </form>
+</div>
+<button id="chat-toggle-btn" class="chat-toggle-btn" type="button">💬</button>
+
 <nav>
   <div class="logo" id="logo-home-link" style="cursor:pointer;">Tamu<em>Feeds</em></div>
   <div class="nav-links">
@@ -71,6 +87,83 @@
         <h3>Track your impact</h3>
         <p>Every completed handoff adds to a running impact dashboard, with badges for milestones.</p>
       </div>
+    </div>
+  </div>
+
+  <!-- MISSION -->
+  <div class="split-section">
+    <div class="split-image" style="background-image:url('https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&w=900&q=80');"></div>
+    <div class="split-text">
+      <div class="section-eyebrow">Why this matters</div>
+      <div class="section-heading">Good food shouldn't go to waste — or to landfill</div>
+      <p>Every day, restaurants across Nairobi end service with trays of good, safe food that simply won't be served again. At the same time, children's homes and shelters are stretched thin trying to stock enough meals. TamuFeeds closes that gap in minutes, not hours — connecting the two sides directly, with no middleman and no cost to either party.</p>
+    </div>
+  </div>
+
+  <!-- LIVE IMPACT NUMBERS -->
+  <div class="impact-band">
+    <div class="section-eyebrow" style="color:var(--amber);">Our impact so far</div>
+    <div class="section-heading" style="color:#fff;">Real numbers, updated live</div>
+    <div class="impact-grid" id="home-impact-stats">
+      <div class="impact-stat"><div class="num">—</div><div class="label">Listings Posted</div></div>
+      <div class="impact-stat"><div class="num">—</div><div class="label">Handoffs Completed</div></div>
+      <div class="impact-stat"><div class="num">—</div><div class="label">Restaurants Onboard</div></div>
+      <div class="impact-stat"><div class="num">—</div><div class="label">NGOs & Homes Onboard</div></div>
+    </div>
+  </div>
+
+  <!-- WHO IT'S FOR -->
+  <div class="content wide">
+    <div class="section-eyebrow">Who it's for</div>
+    <div class="section-heading">Built for both sides of the handoff</div>
+    <div class="audience-grid">
+      <div class="audience-card">
+        <div class="audience-image" style="background-image:url('https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=700&q=80');"></div>
+        <div class="audience-body">
+          <h3>For Restaurants</h3>
+          <ul>
+            <li>Post surplus food in under a minute</li>
+            <li>Set your own pickup window</li>
+            <li>Get notified the moment it's claimed</li>
+            <li>Track your donations on your impact dashboard</li>
+          </ul>
+          <button class="btn-outline nav-btn" data-page="signup">Sign up as a Restaurant</button>
+        </div>
+      </div>
+      <div class="audience-card">
+        <div class="audience-image" style="background-image:url('https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=700&q=80');"></div>
+        <div class="audience-body">
+          <h3>For NGOs & Children's Homes</h3>
+          <ul>
+            <li>Browse a live board of available food nearby</li>
+            <li>Filter by category and location</li>
+            <li>Claim with one tap, see it on the map</li>
+            <li>Coordinate pickup within a clear time window</li>
+          </ul>
+          <button class="btn-outline nav-btn" data-page="signup">Sign up as an Organization</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GALLERY -->
+  <div class="content wide">
+    <div class="section-eyebrow">In the field</div>
+    <div class="section-heading">Where the handoff happens</div>
+    <div class="gallery-grid">
+      <div class="gallery-item" style="background-image:url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=700&q=80');"></div>
+      <div class="gallery-item" style="background-image:url('https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=700&q=80');"></div>
+      <div class="gallery-item" style="background-image:url('https://images.unsplash.com/photo-1509099836639-18ba1795216d?auto=format&fit=crop&w=700&q=80');"></div>
+    </div>
+  </div>
+
+  <!-- CLOSING CTA -->
+  <div class="cta-band" style="background-image:linear-gradient(rgba(15,76,53,0.88), rgba(15,76,53,0.88)), url('https://images.unsplash.com/photo-1593113630400-ea4288922497?auto=format&fit=crop&w=1400&q=80');">
+    <div class="section-eyebrow" style="color:var(--amber);">Ready when you are</div>
+    <div class="section-heading" style="color:#fff;">Join restaurants and NGOs already rescuing food across Nairobi</div>
+    <div class="hero-btns">
+      <button class="btn-gold nav-btn" data-page="signup">Get Started</button>
+      <button class="btn-ghost nav-btn" data-page="browse">Browse Listings</button>
     </div>
   </div>
 </section>
@@ -229,6 +322,13 @@
           <label>Notes (optional)</label>
           <textarea id="donate-notes" placeholder="Any handling notes, allergens, etc."></textarea>
         </div>
+        <div class="form-group">
+          <label>Photo (optional)</label>
+          <input type="file" id="donate-photo" accept="image/*">
+        </div>
+        <label class="checkbox-filter" style="margin-bottom:18px;">
+          <input type="checkbox" id="donate-recurring"> 🔁 Repeat this listing daily
+        </label>
         <button type="submit" class="submit-btn">Post Listing</button>
         <div class="success-msg" id="donate-success">Listing posted! It's now live on the board.</div>
         <div class="error-msg" id="donate-error"></div>
@@ -245,6 +345,7 @@
     <div class="filter-bar">
       <input type="text" id="search-input" placeholder="Search food, restaurant, or location...">
      <label class="checkbox-filter"><input type="checkbox" id="available-only" checked>Available Only</label>
+     <button type="button" id="near-me-btn" class="chip">📍 Near Me</button>
     </div>
     <div class="category-chips" id="category-chips">
   <button type="button" class="chip active" data-category="">All</button>
@@ -255,9 +356,6 @@
   <button type="button" class="chip" data-category="Dairy"><img class="chip-icon" src="https://unpkg.com/lucide-static@latest/icons/milk.svg" alt=""> Dairy</button>
   <button type="button" class="chip" data-category="Other"><img class="chip-icon" src="https://unpkg.com/lucide-static@latest/icons/utensils.svg" alt=""> Other</button>
 </div>
-    <div class="listings" id="listings-container">
-      <label class="checkbox-filter"><input type="checkbox" id="available-only" checked> Avaliable only</label>
-    </div>
     <div class="listings" id="listings-container">
       <div class="empty-state"><div class="big">⏳</div><p>Loading listings...</p></div>
     </div>
@@ -378,6 +476,7 @@
 <script src="js/listings.js"></script>
 <script src="js/dashboard.js"></script>
 <script src="js/map.js"></script>
+<script src="js/chatbot.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

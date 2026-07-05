@@ -70,18 +70,6 @@ const Auth = {
     return { data, error };
   },
 
-  async requestPasswordReset(email) {
-    const { data, error } = await sb.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin + window.location.pathname
-    });
-    return { data, error };
-  },
-
-  async updatePassword(newPassword) {
-    const { data, error } = await sb.auth.updateUser({ password: newPassword });
-    return { data, error };
-  },
-
   isRestaurant() {
     return this.profile?.role === 'restaurant';
   },

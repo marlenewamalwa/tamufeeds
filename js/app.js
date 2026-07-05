@@ -19,6 +19,14 @@ function showPage(id) {
   if (id === 'map' && typeof refreshMap === 'function') refreshMap();
 }
 
+function routeToRoleHome(profile) {
+  if (profile?.role === 'restaurant') {
+    showPage('donate');
+  } else {
+    showPage('browse');
+  }
+}
+
 function updateNavForAuth(session, profile) {
   const loggedOutEls = document.querySelectorAll('[data-auth="out"]');
   const loggedInEls = document.querySelectorAll('[data-auth="in"]');
@@ -34,6 +42,10 @@ function updateNavForAuth(session, profile) {
     }
     document.getElementById('nav-org-name').textContent = profile.org_name;
     document.getElementById('nav-role-pill').textContent = profile.role;
+
+    if (profile.role === 'restaurant') {
+      RecurringListings.checkAndPostDue();
+    }
 
     if (heroCta) {
       if (profile.role === 'restaurant') {
@@ -105,7 +117,8 @@ function initAuthForms() {
       errorEl.style.display = 'block';
       return;
     }
-    showPage('browse');
+    await Auth.loadProfile();
+    routeToRoleHome(Auth.profile);
   });
 
   document.getElementById('logout-btn')?.addEventListener('click', async () => {
@@ -168,11 +181,13 @@ function initDonateForm() {
     const location = document.getElementById('donate-location').value.trim();
     const availableUntil = document.getElementById('donate-until').value;
     const notes = document.getElementById('donate-notes').value.trim();
+    const photoFile = document.getElementById('donate-photo').files[0] || null;
+    const isRecurring = document.getElementById('donate-recurring').checked;
 
-    const { error } = await Listings.create({
+    const { data, error } = await Listings.create({
       foodItem, quantity, category, location,
       availableUntil: new Date(availableUntil).toISOString(),
-      notes
+      notes, photoFile
     });
 
     if (error) {
@@ -180,6 +195,15 @@ function initDonateForm() {
       errorEl.style.display = 'block';
       return;
     }
+
+    if (isRecurring && data) {
+      const durationHours = Math.max(1, Math.round((new Date(availableUntil) - Date.now()) / 3600000));
+      await RecurringListings.createFromListing({
+        foodItem, quantity, category, location,
+        lat: data.lat, lng: data.lng, notes, durationHours
+      });
+    }
+
     successEl.style.display = 'block';
     e.target.reset();
   });
@@ -206,6 +230,15 @@ function renderListings() {
   const filtered = Listings.filter(Listings.cache, { query, category, onlyAvailable });
   const container = document.getElementById('listings-container');
   if (!container) return;
+
+  if (sortByDistance && userLocation) {
+    filtered.forEach(l => {
+      l._distance = (l.lat != null && l.lng != null)
+        ? Listings.distanceKm(userLocation.lat, userLocation.lng, l.lat, l.lng)
+        : Infinity;
+    });
+    filtered.sort((a, b) => a._distance - b._distance);
+  }
 
   if (!filtered.length) {
     container.innerHTML = `<div class="empty-state"><div class="big">🍽️</div><p>No listings match right now. Check back soon.</p></div>`;
@@ -247,11 +280,17 @@ function renderListingCard(l) {
     </div>`;
   }
 
+  const distanceHtml = Number.isFinite(l._distance) ? `<span class="badge distance-badge">${l._distance.toFixed(1)} km</span>` : '';
+
+  const topVisual = l.photo_url
+    ? `<img class="listing-photo" src="${l.photo_url}" alt="${escapeHtml(l.food_item)}">`
+    : `<img class="listing-card-icon" src="${CATEGORY_ICONS[l.category] || CATEGORY_ICONS['Other']}" alt="">`;
+
   return `
     <div class="listing-card ${l.status}" data-listing-id="${l.id}">
-      <div class="listing-card-top">
-        <img class="listing-card-icon" src="${CATEGORY_ICONS[l.category] || CATEGORY_ICONS['Other']}" alt="">
-        ${statusBadge}
+      <div class="listing-card-top ${l.photo_url ? 'has-photo' : ''}">
+        ${topVisual}
+        <div class="badge-wrap">${statusBadge}${distanceHtml}</div>
       </div>
       <div class="listing-body">
         <div class="listing-name">${escapeHtml(l.food_item)}</div>
@@ -271,6 +310,29 @@ function escapeHtml(str) {
   const div = document.createElement('div');
   div.textContent = str;
   return div.innerHTML;
+}
+
+// ---------- Notifications (toasts) ----------
+function showToast(message, type = 'info') {
+  const container = document.getElementById('toast-container');
+  if (!container) return;
+  const toast = document.createElement('div');
+  toast.className = `toast ${type === 'warning' ? 'warning' : ''}`;
+  toast.textContent = message;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 6000);
+}
+
+function handleRealtimeNotification(payload) {
+  if (!Auth.session) return;
+  const uid = Auth.session.user.id;
+
+  if (payload.table === 'claims' && payload.eventType === 'INSERT') {
+    const listing = Listings.cache.find(l => l.id === payload.new.listing_id);
+    if (listing && listing.restaurant_id === uid) {
+      showToast(`🎉 Your listing "${listing.food_item}" was just claimed!`);
+    }
+  }
 }
 
 function attachListingEvents() {
@@ -302,12 +364,18 @@ function tickCountdowns() {
       label.textContent = text;
       const remainingMs = new Date(deadline).getTime() - Date.now();
       box.classList.toggle('urgent', remainingMs > 0 && remainingMs < 30 * 60 * 1000);
+      if (remainingMs > 0 && remainingMs < 15 * 60 * 1000 && !box.dataset.warned) {
+        box.dataset.warned = 'true';
+        showToast('⏰ A pickup window is about to expire — 15 minutes left!', 'warning');
+      }
       if (text === 'Expired') refreshListings();
     });
   }, 1000);
 }
 
 let selectedCategory = '';
+let userLocation = null;
+let sortByDistance = false;
 
 function initFilters() {
   document.getElementById('search-input')?.addEventListener('input', renderListings);
@@ -321,6 +389,42 @@ function initFilters() {
       renderListings();
     });
   });
+
+  document.getElementById('near-me-btn')?.addEventListener('click', toggleNearMe);
+}
+
+function toggleNearMe() {
+  const btn = document.getElementById('near-me-btn');
+
+  if (sortByDistance) {
+    sortByDistance = false;
+    userLocation = null;
+    btn.classList.remove('active');
+    btn.textContent = '📍 Near Me';
+    renderListings();
+    return;
+  }
+
+  if (!navigator.geolocation) {
+    alert('Geolocation is not supported by your browser.');
+    return;
+  }
+
+  btn.textContent = 'Locating...';
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      sortByDistance = true;
+      btn.classList.add('active');
+      btn.textContent = '📍 Near Me ✓';
+      renderListings();
+    },
+    (err) => {
+      console.error('Geolocation error', err);
+      alert("Couldn't get your location. Check your browser's location permission and try again.");
+      btn.textContent = '📍 Near Me';
+    }
+  );
 }
 
 // ---------- Init ----------
@@ -328,6 +432,29 @@ document.getElementById('logo-home-link')?.addEventListener('click', () => showP
 
 const footerYearEl = document.getElementById('footer-year');
 if (footerYearEl) footerYearEl.textContent = new Date().getFullYear();
+
+// ---------- Home page live stats ----------
+async function loadHomeStats() {
+  const el = document.getElementById('home-impact-stats');
+  if (!el) return;
+
+  try {
+    const [{ count: totalListings }, { count: completed }, { count: restaurants }, { count: ngos }] = await Promise.all([
+      sb.from('listings').select('*', { count: 'exact', head: true }),
+      sb.from('listings').select('*', { count: 'exact', head: true }).eq('status', 'completed'),
+      sb.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'restaurant'),
+      sb.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'ngo')
+    ]);
+
+    const nums = el.querySelectorAll('.impact-stat .num');
+    nums[0].textContent = totalListings ?? '0';
+    nums[1].textContent = completed ?? '0';
+    nums[2].textContent = restaurants ?? '0';
+    nums[3].textContent = ngos ?? '0';
+  } catch (err) {
+    console.error('Failed to load home stats', err);
+  }
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.nav-btn[data-page]').forEach(btn => {
@@ -342,14 +469,20 @@ document.addEventListener('DOMContentLoaded', () => {
     updateNavForAuth(session, profile);
     if (event === 'PASSWORD_RECOVERY') {
       showPage('reset-password');
+    } else if (event === 'INITIAL_SESSION') {
+      if (session && profile) {
+        routeToRoleHome(profile);
+      } else {
+        showPage('home');
+      }
+      loadHomeStats();
     }
   });
 
-  Listings.subscribeToChanges(() => {
+  Listings.subscribeToChanges((payload) => {
+    handleRealtimeNotification(payload);
     if (document.getElementById('browse')?.classList.contains('active')) {
       refreshListings();
     }
   });
-
-  showPage('home');
 });

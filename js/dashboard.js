@@ -45,6 +45,27 @@ async function refreshDashboard() {
     ? `<button class="submit-btn dash-action-btn" onclick="showPage('donate')">+ Post a New Listing</button>`
     : `<button class="submit-btn dash-action-btn" onclick="showPage('browse')">Browse Available Listings</button>`;
 
+  let recurringHtml = '';
+  if (data.role === 'restaurant') {
+    const templates = await RecurringListings.fetchMine();
+    if (templates.length) {
+      recurringHtml = `
+        <div class="section-eyebrow" style="margin-top:36px;">Recurring listings</div>
+        <div class="section-heading" style="font-size:20px;margin-bottom:18px;">Auto-posting daily</div>
+        <div class="recurring-list">
+          ${templates.map(t => `
+            <div class="recurring-item">
+              <div>
+                <strong>${t.food_item}</strong>
+                <span class="recurring-meta">${t.quantity} · ${t.location}</span>
+              </div>
+              <button class="btn-outline recurring-stop-btn" data-id="${t.id}" style="width:auto;padding:6px 16px;font-size:12px;">Stop repeating</button>
+            </div>
+          `).join('')}
+        </div>`;
+    }
+  }
+
   const badgesHtml = BADGES.map(b => {
     const unlocked = completed >= b.threshold;
     return `
@@ -60,8 +81,17 @@ async function refreshDashboard() {
     <div class="section-heading">${data.org_name}'s progress</div>
     ${actionHtml}
     ${statsHtml}
+    ${recurringHtml}
     <div class="section-eyebrow" style="margin-top:36px;">Badges</div>
     <div class="section-heading" style="font-size:20px;margin-bottom:18px;">Milestones unlocked</div>
     <div class="badges-grid">${badgesHtml}</div>
   `;
+
+  container.querySelectorAll('.recurring-stop-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      btn.disabled = true;
+      await RecurringListings.stop(btn.dataset.id);
+      refreshDashboard();
+    });
+  });
 }

@@ -23,10 +23,11 @@ const Listings = {
     return this.cache;
   },
 
-  async create({ foodItem, quantity, category, location, availableUntil, notes }) {
+  async create({ foodItem, quantity, category, location, availableUntil, notes, photoFile }) {
     if (!Auth.session) return { error: { message: 'Not logged in' } };
 
     const coords = await this.geocode(location);
+    const photoUrl = photoFile ? await this.uploadPhoto(photoFile) : null;
 
     const { data, error } = await sb.from('listings').insert({
       restaurant_id: Auth.session.user.id,
@@ -37,9 +38,28 @@ const Listings = {
       lat: coords?.lat ?? null,
       lng: coords?.lng ?? null,
       available_until: availableUntil,
-      notes: notes || null
+      notes: notes || null,
+      photo_url: photoUrl
     }).select().single();
     return { data, error };
+  },
+
+  // Uploads a listing photo to Supabase Storage and returns its public URL (or null on failure)
+  async uploadPhoto(file) {
+    try {
+      const ext = file.name.split('.').pop();
+      const path = `${Auth.session.user.id}/${Date.now()}.${ext}`;
+      const { error: uploadError } = await sb.storage.from('listing-photos').upload(path, file);
+      if (uploadError) {
+        console.error('Photo upload failed', uploadError);
+        return null;
+      }
+      const { data } = sb.storage.from('listing-photos').getPublicUrl(path);
+      return data?.publicUrl || null;
+    } catch (err) {
+      console.error('Photo upload failed', err);
+      return null;
+    }
   },
 
   // Turn a free-text location (e.g. "Westlands, Nairobi") into { lat, lng } via OSM Nominatim.
@@ -66,6 +86,15 @@ const Listings = {
     return listing.claims.find(c => c.status === 'reserved') || null;
   },
 
+  // Straight-line distance in km between two lat/lng points (haversine formula)
+  distanceKm(lat1, lng1, lat2, lng2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+    return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+  },
+
   filter(data, { query, category, onlyAvailable }) {
     const q = (query || '').toLowerCase();
     return data.filter(l => {
@@ -90,8 +119,74 @@ const Listings = {
 };
 
 // ============================================================
-// Claims module — reserve / pickup / countdown
+// Recurring Listings module — daily-repeat templates for restaurants
 // ============================================================
+
+const RecurringListings = {
+  async createFromListing({ foodItem, quantity, category, location, lat, lng, notes, durationHours }) {
+    if (!Auth.session) return { error: { message: 'Not logged in' } };
+    const today = new Date().toISOString().slice(0, 10);
+    const { data, error } = await sb.from('recurring_listings').insert({
+      restaurant_id: Auth.session.user.id,
+      food_item: foodItem,
+      quantity,
+      category,
+      location,
+      lat: lat ?? null,
+      lng: lng ?? null,
+      notes: notes || null,
+      duration_hours: durationHours,
+      last_posted_date: today
+    }).select().single();
+    return { data, error };
+  },
+
+  async fetchMine() {
+    if (!Auth.session) return [];
+    const { data, error } = await sb
+      .from('recurring_listings')
+      .select('*')
+      .eq('restaurant_id', Auth.session.user.id)
+      .eq('active', true)
+      .order('created_at', { ascending: false });
+    if (error) {
+      console.error('fetchMine recurring listings error', error);
+      return [];
+    }
+    return data || [];
+  },
+
+  async stop(id) {
+    const { error } = await sb.from('recurring_listings').update({ active: false }).eq('id', id);
+    return { error };
+  },
+
+  // Checks this restaurant's active templates and posts today's listing for any not yet posted today.
+  // Safe to call on every page load — it no-ops if everything is already posted for today.
+  async checkAndPostDue() {
+    if (!Auth.session) return;
+    const today = new Date().toISOString().slice(0, 10);
+    const templates = await this.fetchMine();
+    const due = templates.filter(t => t.last_posted_date !== today);
+
+    for (const t of due) {
+      const availableUntil = new Date(Date.now() + t.duration_hours * 60 * 60 * 1000).toISOString();
+      await sb.from('listings').insert({
+        restaurant_id: t.restaurant_id,
+        food_item: t.food_item,
+        quantity: t.quantity,
+        category: t.category,
+        location: t.location,
+        lat: t.lat,
+        lng: t.lng,
+        available_until: availableUntil,
+        notes: t.notes
+      });
+      await sb.from('recurring_listings').update({ last_posted_date: today }).eq('id', t.id);
+    }
+    return due.length;
+  }
+};
 
 const Claims = {
   RESERVATION_HOURS: 3, // how long an NGO has to pick up after claiming
