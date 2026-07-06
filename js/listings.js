@@ -95,11 +95,6 @@ const Listings = {
     return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
   },
 
-  async cancelListing(id) {
-    const { error } = await sb.from('listings').update({ status: 'expired' }).eq('id', id);
-    return { error };
-  },
-
   filter(data, { query, category, onlyAvailable }) {
     const q = (query || '').toLowerCase();
     return data.filter(l => {

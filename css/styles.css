@@ -379,19 +379,6 @@ nav {
 .recurring-list { display: flex; flex-direction: column; gap: 10px; }
 .recurring-item { background: var(--white); border: 1px solid var(--cream-dark); border-radius: var(--radius-sm); padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
 .recurring-meta { font-size: 12px; color: var(--text-light); margin-left: 8px; }
-
-/* MY ACTIVITY */
-.activity-tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
-.activity-tab { font-size: 12.5px; font-weight: 600; padding: 7px 16px; border-radius: 20px; border: 1.5px solid var(--cream-dark); background: var(--white); color: var(--text-mid); cursor: pointer; }
-.activity-tab.active { background: var(--green-deep); color: #fff; border-color: var(--green-deep); }
-.activity-list { display: flex; flex-direction: column; gap: 10px; }
-.activity-row { background: var(--white); border: 1px solid var(--cream-dark); border-radius: var(--radius-sm); padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
-.activity-sub { font-size: 12px; color: var(--text-light); display: block; margin-top: 3px; }
-.activity-row-right { display: flex; align-items: center; gap: 10px; }
-.status-badge-available { background: var(--green-light); color: var(--green-deep); }
-.status-badge-claimed, .status-badge-reserved { background: var(--amber-light); color: #9A6A0C; }
-.status-badge-completed, .status-badge-picked_up { background: var(--cream-dark); color: var(--text-light); }
-.status-badge-expired, .status-badge-cancelled { background: var(--red-light); color: var(--red); }
 .dash-stat { background: var(--white); border: 1px solid var(--cream-dark); border-radius: var(--radius); padding: 22px; text-align: center; }
 .dash-stat .num { font-family: 'Fraunces', serif; font-size: 32px; font-weight: 700; color: var(--green-deep); }
 .dash-stat .label { font-size: 12px; color: var(--text-mid); text-transform: uppercase; letter-spacing: 0.6px; margin-top: 4px; }
