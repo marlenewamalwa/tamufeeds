@@ -76,6 +76,71 @@ async function refreshDashboard() {
       </div>`;
   }).join('');
 
+  // ---------- My Activity (listings for restaurants, claims for NGOs) ----------
+  await Listings.fetchAll();
+  const uid = Auth.session.user.id;
+  const isRestaurant = data.role === 'restaurant';
+
+  const myItems = isRestaurant
+    ? Listings.cache.filter(l => l.restaurant_id === uid)
+    : Listings.cache.filter(l => (l.claims || []).some(c => c.ngo_id === uid));
+
+  const activityRows = myItems.map(l => {
+    if (isRestaurant) {
+      const activeClaim = (l.claims || []).find(c => c.status === 'reserved' || c.status === 'picked_up');
+      const group = l.status === 'available' || l.status === 'claimed' ? 'active' : l.status;
+      const claimedByHtml = activeClaim?.ngo?.org_name
+        ? `<span class="activity-sub">Claimed by ${activeClaim.ngo.org_name}</span>` : '';
+      const cancelBtn = l.status === 'available'
+        ? `<button class="btn-outline activity-cancel-btn" data-id="${l.id}" style="width:auto;padding:6px 14px;font-size:12px;">Cancel</button>` : '';
+      return `
+        <div class="activity-row" data-group="${group}">
+          <div>
+            <strong>${l.food_item}</strong>
+            <span class="activity-sub">${l.quantity} · ${l.location} · ${new Date(l.created_at).toLocaleDateString()}</span>
+            ${claimedByHtml}
+          </div>
+          <div class="activity-row-right">
+            <span class="badge status-badge-${l.status}">${l.status}</span>
+            ${cancelBtn}
+          </div>
+        </div>`;
+    } else {
+      const myClaim = (l.claims || []).find(c => c.ngo_id === uid);
+      const group = myClaim.status === 'reserved' ? 'active' : (myClaim.status === 'picked_up' ? 'completed' : 'expired');
+      const isOverdue = myClaim.status === 'reserved' && new Date(myClaim.pickup_deadline).getTime() < Date.now();
+      const countdown = myClaim.status === 'reserved' && !isOverdue
+        ? `<span class="activity-sub">⏱ ${Claims.formatCountdown(myClaim.pickup_deadline)} left</span>` : '';
+      const pickupBtn = myClaim.status === 'reserved' && !isOverdue
+        ? `<button class="submit-btn activity-pickup-btn" data-claim-id="${myClaim.id}" style="width:auto;padding:6px 14px;font-size:12px;">Mark picked up</button>` : '';
+      return `
+        <div class="activity-row" data-group="${group}">
+          <div>
+            <strong>${l.food_item}</strong>
+            <span class="activity-sub">${l.restaurant?.org_name || 'Unknown'} · ${l.location}</span>
+            ${countdown}
+          </div>
+          <div class="activity-row-right">
+            <span class="badge status-badge-${myClaim.status}">${myClaim.status}</span>
+            ${pickupBtn}
+          </div>
+        </div>`;
+    }
+  }).join('');
+
+  const activityHtml = `
+    <div class="section-eyebrow" style="margin-top:36px;">My activity</div>
+    <div class="section-heading" style="font-size:20px;margin-bottom:14px;">${isRestaurant ? 'Your posted listings' : 'Your claims'}</div>
+    <div class="activity-tabs">
+      <button type="button" class="activity-tab active" data-group="all">All</button>
+      <button type="button" class="activity-tab" data-group="active">Active</button>
+      <button type="button" class="activity-tab" data-group="completed">Completed</button>
+      <button type="button" class="activity-tab" data-group="expired">Expired</button>
+    </div>
+    <div class="activity-list" id="activity-list">
+      ${activityRows || '<div class="empty-state" style="padding:24px 0;"><p>Nothing here yet.</p></div>'}
+    </div>`;
+
   container.innerHTML = `
     <div class="section-eyebrow">Your impact</div>
     <div class="section-heading">${data.org_name}'s progress</div>
@@ -85,6 +150,7 @@ async function refreshDashboard() {
     <div class="section-eyebrow" style="margin-top:36px;">Badges</div>
     <div class="section-heading" style="font-size:20px;margin-bottom:18px;">Milestones unlocked</div>
     <div class="badges-grid">${badgesHtml}</div>
+    ${activityHtml}
   `;
 
   container.querySelectorAll('.recurring-stop-btn').forEach(btn => {
@@ -92,6 +158,33 @@ async function refreshDashboard() {
       btn.disabled = true;
       await RecurringListings.stop(btn.dataset.id);
       refreshDashboard();
+    });
+  });
+
+  container.querySelectorAll('.activity-cancel-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      btn.disabled = true;
+      await Listings.cancelListing(btn.dataset.id);
+      refreshDashboard();
+    });
+  });
+
+  container.querySelectorAll('.activity-pickup-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      btn.disabled = true;
+      await Claims.markPickedUp(btn.dataset.claimId);
+      refreshDashboard();
+    });
+  });
+
+  container.querySelectorAll('.activity-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      container.querySelectorAll('.activity-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      const group = tab.dataset.group;
+      container.querySelectorAll('.activity-row').forEach(row => {
+        row.style.display = (group === 'all' || row.dataset.group === group) ? 'flex' : 'none';
+      });
     });
   });
 }
