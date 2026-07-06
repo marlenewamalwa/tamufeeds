@@ -1,0 +1,25 @@
+{
+  "name": "TamuFeeds — Rescue Food, Feed Children",
+  "short_name": "TamuFeeds",
+  "description": "Connects restaurants with surplus food to children's homes and NGOs across Nairobi.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#17241F",
+  "theme_color": "#0F4C35",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

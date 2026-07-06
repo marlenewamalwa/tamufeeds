@@ -446,7 +446,7 @@ async function loadHomeStats() {
       sb.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'ngo')
     ]);
 
-    const nums = el.querySelectorAll('.impact-stat .num');
+    const nums = el.querySelectorAll('.tf-counter .num');
     nums[0].textContent = totalListings ?? '0';
     nums[1].textContent = completed ?? '0';
     nums[2].textContent = restaurants ?? '0';
