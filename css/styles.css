@@ -542,7 +542,7 @@ nav {
 .listing-card {
   background: var(--white); border: 1px solid var(--cream-dark); border-radius: var(--radius);
   overflow: hidden; display: flex; flex-direction: column;
-  transition: box-shadow 0.2s, transform 0.15s; animation: fadeUp 0.25s ease both;
+  transition: box-shadow 0.2s, transform 0.15s;
 }
 .listing-card:hover { box-shadow: 0 8px 28px rgba(15,76,53,0.1); transform: translateY(-2px); }
 .listing-card.claimed { opacity: 0.85; }
