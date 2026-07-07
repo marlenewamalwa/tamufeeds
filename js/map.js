@@ -13,6 +13,11 @@ const STATUS_COLOR = {
 
 let map = null;
 let markersLayer = null;
+let mapListings = [];
+let legendWired = false;
+
+// Which statuses are currently shown on the map. Starts as "all" (every key active).
+let activeStatuses = new Set(Object.keys(STATUS_COLOR));
 
 function initMap() {
   if (map) return; // already initialized, just needs refreshMap() to redraw markers
@@ -27,28 +32,66 @@ function initMap() {
   markersLayer = L.layerGroup().addTo(map);
 }
 
+// Wires up the legend chips as clickable status filters. Click a chip to isolate
+// that status; click the same chip again (when it's the only one active) to
+// restore showing every status. Only needs to run once.
+function initMapLegend() {
+  if (legendWired) return;
+  legendWired = true;
+
+  document.querySelectorAll('.map-legend-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const status = chip.dataset.status;
+      const isSoloActive = activeStatuses.size === 1 && activeStatuses.has(status);
+
+      activeStatuses = isSoloActive
+        ? new Set(Object.keys(STATUS_COLOR))
+        : new Set([status]);
+
+      updateLegendUI();
+      renderMapMarkers();
+    });
+  });
+}
+
+function updateLegendUI() {
+  document.querySelectorAll('.map-legend-chip').forEach(chip => {
+    chip.classList.toggle('active', activeStatuses.has(chip.dataset.status));
+  });
+}
+
 async function refreshMap() {
   initMap();
+  initMapLegend();
 
   // Leaflet needs a nudge to size correctly if the container was hidden (display:none) on init
   setTimeout(() => map.invalidateSize(), 0);
 
   await Listings.fetchAll();
-  const listings = Listings.cache;
+  mapListings = Listings.cache;
+  renderMapMarkers();
+}
 
+// Redraws markers from the current mapListings cache, applying the active legend filter.
+// Called on refresh and whenever a legend chip is clicked (no refetch needed).
+function renderMapMarkers() {
+  if (!markersLayer) return;
   markersLayer.clearLayers();
 
-  const note = document.getElementById('map-note');
-  const withCoords = listings.filter(l => l.lat != null && l.lng != null);
+  const withCoords = mapListings.filter(l => l.lat != null && l.lng != null);
+  const visible = withCoords.filter(l => activeStatuses.has(l.status));
 
+  const note = document.getElementById('map-note');
   if (note) {
-    const missing = listings.length - withCoords.length;
-    note.textContent = missing > 0
-      ? `${withCoords.length} listing(s) plotted. ${missing} listing(s) have no map location yet.`
-      : `${withCoords.length} listing(s) plotted.`;
+    const missing = mapListings.length - withCoords.length;
+    const filteredOut = withCoords.length - visible.length;
+    let text = `${visible.length} listing(s) plotted.`;
+    if (filteredOut > 0) text += ` ${filteredOut} hidden by filter.`;
+    if (missing > 0) text += ` ${missing} listing(s) have no map location yet.`;
+    note.textContent = text;
   }
 
-  withCoords.forEach(l => {
+  visible.forEach(l => {
     const color = STATUS_COLOR[l.status] || STATUS_COLOR.available;
     const marker = L.circleMarker([l.lat, l.lng], {
       radius: 9,
@@ -74,8 +117,8 @@ async function refreshMap() {
     marker.addTo(markersLayer);
   });
 
-  if (withCoords.length) {
-    const bounds = L.latLngBounds(withCoords.map(l => [l.lat, l.lng]));
+  if (visible.length) {
+    const bounds = L.latLngBounds(visible.map(l => [l.lat, l.lng]));
     map.fitBounds(bounds.pad(0.2));
   }
 }

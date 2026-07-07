@@ -188,7 +188,12 @@ function initDonateForm() {
     const notes = document.getElementById('donate-notes').value.trim();
     const photoFile = document.getElementById('donate-photo').files[0] || null;
     const isRecurring = document.getElementById('donate-recurring').checked;
-
+    
+if (!photoFile) {
+      errorEl.textContent = 'Please attach a photo of the food.';
+      errorEl.style.display = 'block';
+      return;
+    }
     const { data, error } = await Listings.create({
       foodItem, quantity, category, location,
       availableUntil: new Date(availableUntil).toISOString(),

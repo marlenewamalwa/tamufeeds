@@ -1,7 +1,3 @@
-// ============================================================
-// Listings module — fetch / create / filter / realtime
-// ============================================================
-
 const Listings = {
   cache: [],
 
@@ -23,11 +19,15 @@ const Listings = {
     return this.cache;
   },
 
-  async create({ foodItem, quantity, category, location, availableUntil, notes, photoFile }) {
+ async create({ foodItem, quantity, category, location, availableUntil, notes, photoFile }) {
     if (!Auth.session) return { error: { message: 'Not logged in' } };
+    if (!photoFile) return { error: { message: 'Please attach a photo of the food.' } };
 
     const coords = await this.geocode(location);
-    const photoUrl = photoFile ? await this.uploadPhoto(photoFile) : null;
+    const photoUrl = await this.uploadPhoto(photoFile);
+    if (!photoUrl) {
+      return { error: { message: 'Photo upload failed. Please try a different image or check your connection.' } };
+    }
 
     const { data, error } = await sb.from('listings').insert({
       restaurant_id: Auth.session.user.id,

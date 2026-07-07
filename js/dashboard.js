@@ -1,10 +1,3 @@
-const BADGES = [
-  { id: 'first_rescue', icon: '🌱', name: 'First Rescue', desc: '1 completed handoff', threshold: 1 },
-  { id: 'on_a_roll', icon: '🔥', name: 'On a Roll', desc: '5 completed handoffs', threshold: 5 },
-  { id: 'community_hero', icon: '🏆', name: 'Community Hero', desc: '20 completed handoffs', threshold: 20 },
-  { id: 'legend', icon: '⭐', name: 'TamuFeeds Legend', desc: '50 completed handoffs', threshold: 50 }
-];
-
 async function refreshDashboard() {
   const container = document.getElementById('dashboard-content');
   if (!container) return;
@@ -65,16 +58,6 @@ async function refreshDashboard() {
         </div>`;
     }
   }
-
-  const badgesHtml = BADGES.map(b => {
-    const unlocked = completed >= b.threshold;
-    return `
-      <div class="badge-card ${unlocked ? '' : 'locked'}">
-        <div class="badge-icon">${b.icon}</div>
-        <div class="badge-name">${b.name}</div>
-        <div class="badge-desc">${b.desc}</div>
-      </div>`;
-  }).join('');
 
   // ---------- My Activity (listings for restaurants, claims for NGOs) ----------
   await Listings.fetchAll();
@@ -152,9 +135,6 @@ async function refreshDashboard() {
     ${actionHtml}
     ${statsHtml}
     ${recurringHtml}
-    <div class="section-eyebrow" style="margin-top:36px;">Badges</div>
-    <div class="section-heading" style="font-size:20px;margin-bottom:18px;">Milestones unlocked</div>
-    <div class="badges-grid">${badgesHtml}</div>
     ${activityHtml}
   `;
 
