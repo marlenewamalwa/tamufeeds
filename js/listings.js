@@ -87,12 +87,45 @@ const Listings = {
   },
 
   // Straight-line distance in km between two lat/lng points (haversine formula)
+  // Tally which categories this NGO has claimed most in the past, for smart-match scoring
+  async getNgoAffinity(ngoId) {
+    const { data, error } = await sb
+      .from('claims')
+      .select('listing:listings(category)')
+      .eq('ngo_id', ngoId);
+
+    if (error) {
+      console.error('getNgoAffinity error', error);
+      return {};
+    }
+
+    const counts = {};
+    let total = 0;
+    (data || []).forEach(c => {
+      const cat = c.listing?.category;
+      if (!cat) return;
+      counts[cat] = (counts[cat] || 0) + 1;
+      total++;
+    });
+
+    const affinity = {};
+    Object.keys(counts).forEach(cat => {
+      affinity[cat] = counts[cat] / total;
+    });
+    return affinity; // e.g. { 'Cooked food': 0.6, 'Dairy': 0.4 }
+  },
+
   distanceKm(lat1, lng1, lat2, lng2) {
     const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLng = (lng2 - lng1) * Math.PI / 180;
     const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
     return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+  },
+
+  async cancelListing(id) {
+    const { error } = await sb.from('listings').update({ status: 'expired' }).eq('id', id);
+    return { error };
   },
 
   filter(data, { query, category, onlyAvailable }) {

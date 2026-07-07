@@ -36,6 +36,11 @@ function updateNavForAuth(session, profile) {
   loggedOutEls.forEach(el => el.style.display = session ? 'none' : '');
   loggedInEls.forEach(el => el.style.display = session ? '' : 'none');
 
+  document.querySelectorAll('[data-role]').forEach(el => {
+    if (el === donateBtn) return; // donateBtn already handled explicitly below
+    el.style.display = (session && profile && el.dataset.role === profile.role) ? '' : 'none';
+  });
+
   if (session && profile) {
     if (donateBtn) {
       donateBtn.style.display = profile.role === 'restaurant' ? '' : 'none';
@@ -231,7 +236,10 @@ function renderListings() {
   const container = document.getElementById('listings-container');
   if (!container) return;
 
-  if (sortByDistance && userLocation) {
+  if (smartMatchActive) {
+    filtered.forEach(l => { l._matchScore = computeMatchScore(l); });
+    filtered.sort((a, b) => b._matchScore - a._matchScore);
+  } else if (sortByDistance && userLocation) {
     filtered.forEach(l => {
       l._distance = (l.lat != null && l.lng != null)
         ? Listings.distanceKm(userLocation.lat, userLocation.lng, l.lat, l.lng)
@@ -281,6 +289,7 @@ function renderListingCard(l) {
   }
 
   const distanceHtml = Number.isFinite(l._distance) ? `<span class="badge distance-badge">${l._distance.toFixed(1)} km</span>` : '';
+  const matchHtml = Number.isFinite(l._matchScore) ? `<span class="badge match-badge">🎯 ${l._matchScore}% match</span>` : '';
 
   const topVisual = l.photo_url
     ? `<img class="listing-photo" src="${l.photo_url}" alt="${escapeHtml(l.food_item)}">`
@@ -290,7 +299,7 @@ function renderListingCard(l) {
     <div class="listing-card ${l.status}" data-listing-id="${l.id}">
       <div class="listing-card-top ${l.photo_url ? 'has-photo' : ''}">
         ${topVisual}
-        <div class="badge-wrap">${statusBadge}${distanceHtml}</div>
+        <div class="badge-wrap">${statusBadge}${distanceHtml}${matchHtml}</div>
       </div>
       <div class="listing-body">
         <div class="listing-name">${escapeHtml(l.food_item)}</div>
@@ -376,6 +385,8 @@ function tickCountdowns() {
 let selectedCategory = '';
 let userLocation = null;
 let sortByDistance = false;
+let smartMatchActive = false;
+let ngoAffinity = null;
 
 function initFilters() {
   document.getElementById('search-input')?.addEventListener('input', renderListings);
@@ -391,6 +402,53 @@ function initFilters() {
   });
 
   document.getElementById('near-me-btn')?.addEventListener('click', toggleNearMe);
+  document.getElementById('smart-match-btn')?.addEventListener('click', toggleSmartMatch);
+}
+
+async function toggleSmartMatch() {
+  const btn = document.getElementById('smart-match-btn');
+
+  if (smartMatchActive) {
+    smartMatchActive = false;
+    btn.classList.remove('active');
+    btn.textContent = '🎯 Smart Match';
+    renderListings();
+    return;
+  }
+
+  btn.textContent = 'Matching…';
+  if (sortByDistance) {
+    sortByDistance = false;
+    const nearBtn = document.getElementById('near-me-btn');
+    nearBtn.classList.remove('active');
+    nearBtn.textContent = '📍 Near Me';
+  }
+  ngoAffinity = await Listings.getNgoAffinity(Auth.session.user.id);
+  smartMatchActive = true;
+  btn.classList.add('active');
+  btn.textContent = '🎯 Smart Match ✓';
+  renderListings();
+}
+
+function computeMatchScore(l) {
+  let score = 0;
+
+  const catAffinity = ngoAffinity?.[l.category] || 0;
+  score += catAffinity * 50;
+
+  const hoursLeft = (new Date(l.available_until) - Date.now()) / 3600000;
+  if (hoursLeft > 0) {
+    const urgency = Math.max(0, 1 - Math.min(hoursLeft, 12) / 12);
+    score += urgency * 30;
+  }
+
+  if (userLocation && l.lat != null && l.lng != null) {
+    const dist = Listings.distanceKm(userLocation.lat, userLocation.lng, l.lat, l.lng);
+    const proximity = Math.max(0, 1 - Math.min(dist, 15) / 15);
+    score += proximity * 20;
+  }
+
+  return Math.round(score);
 }
 
 function toggleNearMe() {
@@ -403,6 +461,13 @@ function toggleNearMe() {
     btn.textContent = '📍 Near Me';
     renderListings();
     return;
+  }
+
+  if (smartMatchActive) {
+    smartMatchActive = false;
+    const smartBtn = document.getElementById('smart-match-btn');
+    smartBtn.classList.remove('active');
+    smartBtn.textContent = '🎯 Smart Match';
   }
 
   if (!navigator.geolocation) {

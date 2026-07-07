@@ -31,6 +31,20 @@
 </div>
 <button id="chat-toggle-btn" class="chat-toggle-btn" type="button">💬</button>
 
+<div id="chat-modal-overlay" class="chat-modal-overlay">
+  <div class="chat-modal">
+    <div class="chat-modal-header">
+      <span id="chat-modal-title">Chat</span>
+      <button id="chat-modal-close" class="chat-close-btn" type="button">&times;</button>
+    </div>
+    <div id="chat-modal-log" class="chat-log"></div>
+    <form id="chat-modal-form" class="chat-form">
+      <input id="chat-modal-input" type="text" placeholder="Type a message..." autocomplete="off">
+      <button type="submit">Send</button>
+    </form>
+  </div>
+</div>
+
 <nav>
   <div class="logo" id="logo-home-link" style="cursor:pointer;">Tamu<em>Feeds</em></div>
   <div class="nav-links">
@@ -398,6 +412,7 @@
       <input type="text" id="search-input" placeholder="Search food, restaurant, or location...">
      <label class="checkbox-filter"><input type="checkbox" id="available-only" checked>Available Only</label>
      <button type="button" id="near-me-btn" class="chip">📍 Near Me</button>
+     <button type="button" id="smart-match-btn" class="chip" data-role="ngo" style="display:none;">🎯 Smart Match</button>
     </div>
     <div class="category-chips" id="category-chips">
   <button type="button" class="chip active" data-category="">All</button>
@@ -530,6 +545,7 @@
 <script src="js/map.js"></script>
 <script src="js/chatbot.js"></script>
 <script src="js/demo.js"></script>
+<script src="js/messaging.js"></script>
 <script src="js/app.js"></script>
 <script>
   if ('serviceWorker' in navigator) {
