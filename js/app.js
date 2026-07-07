@@ -188,7 +188,7 @@ function initDonateForm() {
     const notes = document.getElementById('donate-notes').value.trim();
     const photoFile = document.getElementById('donate-photo').files[0] || null;
     const isRecurring = document.getElementById('donate-recurring').checked;
-    
+
 if (!photoFile) {
       errorEl.textContent = 'Please attach a photo of the food.';
       errorEl.style.display = 'block';
@@ -206,11 +206,12 @@ if (!photoFile) {
       return;
     }
 
-    if (isRecurring && data) {
+   if (isRecurring && data) {
       const durationHours = Math.max(1, Math.round((new Date(availableUntil) - Date.now()) / 3600000));
       await RecurringListings.createFromListing({
         foodItem, quantity, category, location,
-        lat: data.lat, lng: data.lng, notes, durationHours
+        lat: data.lat, lng: data.lng, notes, durationHours,
+        photoUrl: data.photo_url
       });
     }
 

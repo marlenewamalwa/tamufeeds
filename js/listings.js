@@ -156,7 +156,7 @@ const Listings = {
 // ============================================================
 
 const RecurringListings = {
-  async createFromListing({ foodItem, quantity, category, location, lat, lng, notes, durationHours }) {
+  async createFromListing({ foodItem, quantity, category, location, lat, lng, notes, durationHours, photoUrl }) {
     if (!Auth.session) return { error: { message: 'Not logged in' } };
     const today = new Date().toISOString().slice(0, 10);
     const { data, error } = await sb.from('recurring_listings').insert({
@@ -169,6 +169,7 @@ const RecurringListings = {
       lng: lng ?? null,
       notes: notes || null,
       duration_hours: durationHours,
+      photo_url: photoUrl ?? null,
       last_posted_date: today
     }).select().single();
     return { data, error };
