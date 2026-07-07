@@ -86,6 +86,14 @@ body {
 .chat-form { display: flex; border-top: 1px solid var(--cream-dark); }
 .chat-form input { flex: 1; border: none; padding: 12px 14px; font-size: 13px; outline: none; font-family: 'Inter', sans-serif; }
 .chat-form button { border: none; background: var(--green-deep); color: #fff; padding: 0 16px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.whatsapp-fallback {
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 10px 14px; border-top: 1px solid var(--cream-dark);
+  background: var(--cream); color: #1F9E52; font-size: 12.5px; font-weight: 600;
+  text-decoration: none; transition: background 0.15s;
+}
+.whatsapp-fallback:hover { background: var(--cream-dark); }
+.whatsapp-icon { width: 15px; height: 15px; flex-shrink: 0; }
 
 /* CHAT MODAL (per-claim messaging) */
 .chat-modal-overlay {
@@ -524,7 +532,7 @@ nav {
 #near-me-btn { margin-left: auto; }
 .badge-wrap { display: flex; gap: 6px; align-items: flex-start; }
 .distance-badge { background: var(--green-light); color: var(--green-deep); }
-.match-badge { background: var(--tf-marigold); color: #fff; }
+.match-badge { background: var(--tf-marigold); color: #fff; display: inline-flex; align-items: center; }
 
 .view-toggle { display: flex; gap: 6px; margin-bottom: 18px; }
 .view-toggle button { font-size: 12px; font-weight: 600; padding: 6px 14px; border-radius: 20px; border: 1.5px solid var(--cream-dark); background: var(--white); color: var(--text-mid); cursor: pointer; }
@@ -540,12 +548,31 @@ nav {
 .listing-card.claimed { opacity: 0.85; }
 .listing-card.completed, .listing-card.expired { opacity: 0.5; }
 .listing-card-top {
-  background: var(--green-light); padding: 24px 18px 18px;
-  display: flex; align-items: flex-start; justify-content: space-between;
+  background: var(--cream-dark); padding: 18px;
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
 }
-.chip-icon { width: 15px; height: 15px; vertical-align: -3px; margin-right: 5px; filter: brightness(0) saturate(100%) opacity(0.6); }
-.chip.active .chip-icon { filter: brightness(0) invert(1); }
-.listing-card-icon { width: 40px; height: 40px; }
+.chip-icon { width: 15px; height: 15px; vertical-align: -3px; margin-right: 6px; color: var(--text-mid); opacity: 0.75; }
+.chip:hover .chip-icon { color: var(--green-deep); opacity: 1; }
+.chip.active .chip-icon { color: #fff; opacity: 1; }
+
+/* Listing category icon badge */
+.listing-icon-badge {
+  width: 52px; height: 52px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.listing-icon { width: 26px; height: 26px; }
+.tint-green  { background: var(--green-light); color: var(--green-deep); }
+.tint-tomato { background: var(--red-light);   color: var(--tf-tomato); }
+.tint-amber  { background: var(--amber-light); color: var(--amber); }
+.tint-kraft  { background: var(--tf-kraft);    color: #7A5E2E; }
+.tint-cream  { background: var(--cream-dark);  color: var(--green-mid); }
+.tint-mid    { background: var(--cream-dark);  color: var(--text-mid); }
+
+/* Small inline icons used in listing meta rows and badges */
+.meta-icon { width: 13px; height: 13px; flex-shrink: 0; color: var(--text-light); }
+.badge-icon { width: 11px; height: 11px; vertical-align: -1px; margin-right: 3px; }
+
 .listing-card-top.has-photo { padding: 0; background: var(--cream-dark); position: relative; height: 150px; overflow: hidden; }
 .listing-photo { width: 100%; height: 100%; object-fit: cover; display: block; }
 .listing-card-top.has-photo .badge-wrap { position: absolute; top: 10px; right: 10px; }
@@ -556,8 +583,8 @@ nav {
 .badge.completed-badge { background: var(--cream-dark); color: var(--text-light); }
 .badge.expired-badge { background: var(--red-light); color: var(--red); }
 .listing-biz { font-size: 13px; font-weight: 500; color: var(--green-mid); margin-bottom: 10px; }
-.listing-meta { display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; color: var(--text-light); margin-bottom: 12px; }
-.listing-meta span { display: flex; align-items: center; gap: 5px; }
+.listing-meta { display: flex; flex-direction: column; gap: 7px; font-size: 12.5px; color: var(--text-mid); margin-bottom: 12px; }
+.listing-meta span { display: flex; align-items: center; gap: 7px; }
 .listing-action { margin-top: auto; }
 .claim-btn { width: 100%; font-size: 13px; font-weight: 600; padding: 9px 20px; border-radius: 30px; border: 1.5px solid var(--green-deep); color: var(--green-deep); background: transparent; cursor: pointer; transition: all 0.15s; }
 .claim-btn:hover { background: var(--green-deep); color: #fff; }
@@ -574,7 +601,7 @@ nav {
 
 /* EMPTY */
 .empty-state { text-align: center; padding: 60px 24px; color: var(--text-light); }
-.empty-state .big { font-size: 48px; margin-bottom: 12px; }
+.empty-state-icon { width: 64px; height: 64px; margin-bottom: 14px; color: var(--green-mid); opacity: 0.55; }
 .empty-state p { font-size: 15px; }
 
 /* DASHBOARD */
